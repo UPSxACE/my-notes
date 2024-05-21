@@ -15,7 +15,7 @@ export default function Home() {
         <div className="relative max-w-screen-xl px-6 w-full flex flex-col pb-[calc((((80vw-3rem)*0.8)/1.5)*0.3)] xl:pb-[calc((((1280px-3rem)*0.8)/1.5)*0.3)]">
           <Header />
           <div className="flex flex-col py-6 px-4 items-center gap-6 flex-1 justify-center">
-            <h1 className="text-center text-4xl md:text-5xl font-bold max-w-[80%] leading-snug">
+            <h1 className="text-center text-2xl sm:text-4xl md:text-5xl font-bold max-w-[80%] leading-snug">
               Save your thoughts
               <br />
               and take control of your life again
