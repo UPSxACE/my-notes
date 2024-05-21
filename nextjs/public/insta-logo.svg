@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW 2018 (64 Bit Versão de avaliação) -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="4.7625mm" height="4.7626mm" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 476.26 476.27"
+ xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil1 {fill:white}
+    .fil0 {fill:url(#id0)}
+   ]]>
+  </style>
+  <linearGradient id="id0" gradientUnits="userSpaceOnUse" x1="80.19" y1="411.86" x2="396.06" y2="64.39">
+   <stop offset="0" style="stop-opacity:1; stop-color:#F58529"/>
+   <stop offset="0.168627" style="stop-opacity:1; stop-color:#FEDA77"/>
+   <stop offset="0.478431" style="stop-opacity:1; stop-color:#DD2A7B"/>
+   <stop offset="0.780392" style="stop-opacity:1; stop-color:#8134AF"/>
+   <stop offset="1" style="stop-opacity:1; stop-color:#515BD4"/>
+  </linearGradient>
+ </defs>
+ <g id="Camada_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <path class="fil0" d="M238.13 0c131.51,0 238.14,106.61 238.14,238.14 0,131.52 -106.61,238.14 -238.14,238.14 -131.52,0 -238.13,-106.63 -238.13,-238.15 0,-131.51 106.61,-238.13 238.13,-238.13z"/>
+  <path class="fil1" d="M277 330.68l-77.73 0c-29.2,0 -53.07,-23.75 -53.07,-52.77l0 -78.13c0,-29.03 23.88,-52.79 53.07,-52.79l77.73 0c29.19,0 53.07,23.76 53.07,52.79l0 78.13c0,29.02 -23.88,52.77 -53.07,52.77zm9.99 -149.92c0,5.51 4.47,9.98 9.97,9.98 5.51,0 9.98,-4.47 9.98,-9.98 0,-5.5 -4.47,-9.97 -9.98,-9.97 -5.5,0 -9.97,4.47 -9.97,9.97zm-49.45 121.38c33.9,0 61.41,-27.51 61.41,-61.42 0,-33.9 -27.51,-61.41 -61.41,-61.41 -33.91,0 -61.43,27.51 -61.43,61.41 0,33.91 27.52,61.42 61.43,61.42zm40.67 -61.42c0,22.46 -18.22,40.68 -40.67,40.68 -22.46,0 -40.68,-18.22 -40.68,-40.68 0,-22.45 18.21,-40.67 40.68,-40.67 22.45,0 40.67,18.22 40.67,40.67zm6.38 -111.53l-92.92 0.01c-34.88,0 -63.42,28.18 -63.42,62.6l0 92.67c0,34.43 28.54,62.6 63.42,62.6l92.92 0c34.88,0 63.42,-28.17 63.42,-62.6l0 -92.67c0,-34.43 -28.54,-62.61 -63.42,-62.61z"/>
+ </g>
+</svg>
