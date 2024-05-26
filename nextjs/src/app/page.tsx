@@ -1,11 +1,11 @@
-import Footer from "@/components/ui-layout/footer";
-import Header from "@/components/ui-layout/header";
-import CtaButton from "@/components/ui-theme/cta-button";
-import Image from "next/image";
+import ImageSync from "@/components/image-sync";
+import Footer from "@/components/layout/footer";
+import Header from "@/components/layout/header";
+import CtaButton from "@/components/theme/cta-button";
 import Link from "next/link";
 import { IoMdChatboxes } from "react-icons/io";
 
-export default function Home() {
+export default function HomePage() {
   return (
     <main className="font-sans">
       <section
@@ -36,7 +36,12 @@ export default function Home() {
           </div>
           <div className="text-white absolute left-0 top-[calc(100%-((((80vw-3rem)*0.8)/1.5)*0.3))] xl:top-[calc(100%-((((1280px-3rem)*0.8)/1.5)*0.3))] w-full h-[calc(((80vw-3rem)*0.8)/1.5)] xl:h-[calc((1280px-3rem)*0.8/1.5)] flex justify-center">
             <div className="relative h-full w-[calc((80vw-3rem)*0.8)] xl:w-[calc((1280px-3rem)*0.8)]">
-              <Image src="/screenshot.png" alt="application screenshot" fill />
+              <ImageSync
+                src="/screenshot.webp"
+                alt="application screenshot"
+                fill
+                priority
+              />
             </div>
           </div>
         </div>

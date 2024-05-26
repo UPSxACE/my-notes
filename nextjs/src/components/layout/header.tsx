@@ -1,5 +1,5 @@
 import Link from "next/link";
-import CtaButton from "../ui-theme/cta-button";
+import CtaButton from "../theme/cta-button";
 
 export default function Header() {
   return (

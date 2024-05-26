@@ -15,7 +15,12 @@ export default function Footer() {
         target="_blank"
         className="flex items-start  relative h-[45px] w-[168px]"
       >
-        <Image alt="logo" src="/logo-dark.svg" fill objectFit="contain" />
+        <Image
+          style={{ objectFit: "contain" }}
+          alt="logo"
+          src="/logo-dark.svg"
+          fill
+        />
       </Link>
       <div className="flex gap-4 h-[60px]  items-center">
         <Button

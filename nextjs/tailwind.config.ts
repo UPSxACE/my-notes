@@ -25,6 +25,7 @@ const config = {
       colors: {
         "theme-9": "#41347a",
         "theme-8": "#5c419c",
+        "theme-7": "#6e5df8",
         "theme-6": "#7261ff",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
