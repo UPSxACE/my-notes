@@ -18,9 +18,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@/fastify/*": ["../fastify/*"]
     }
+    // "typeRoots": ["node_modules/@types", "../fastify/graphql-types"]
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "../fastify/**/*.ts"
+  ],
+  "exclude": ["node_modules"],
+  "references": [{ "path": "../fastify" }]
 }

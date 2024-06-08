@@ -1,3 +1,5 @@
+import { auth } from "@/auth";
+import ApolloClientProvider from "@/context/apollo";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
@@ -14,14 +16,29 @@ export const metadata: Metadata = {
   description: "Open source note-taking app",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
+  all,
+  guest,
+  authenticated,
 }: Readonly<{
   children: React.ReactNode;
+  all: React.ReactNode;
+  guest: React.ReactNode;
+  authenticated: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className={cn(fontSans.variable)}>{children}</body>
-    </html>
+    <ApolloClientProvider>
+      <html lang="en" className="scroll-smooth">
+        <body className={cn(fontSans.variable)}>
+          {all}
+          {guest}
+          {authenticated}
+          {children}
+        </body>
+      </html>
+    </ApolloClientProvider>
   );
 }

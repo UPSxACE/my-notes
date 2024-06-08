@@ -27,6 +27,7 @@ const config = {
         "theme-8": "#5c419c",
         "theme-7": "#6e5df8",
         "theme-6": "#7261ff",
+        "theme-1": "#e0e7ff",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -75,10 +76,17 @@ const config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        // input-otp
+        "caret-blink": {
+          "0%,70%,100%": { opacity: "1" },
+          "20%,50%": { opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        // input otp:
+        "caret-blink": "caret-blink 1.25s ease-out infinite",
       },
     },
   },

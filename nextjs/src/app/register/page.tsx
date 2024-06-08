@@ -29,9 +29,11 @@ export default function RegisterPage() {
         <div className="relative aspect-square w-3/5 max-w-[500px]">
           <Image
             style={{ objectFit: "contain" }}
-            src="./figure-1.svg"
+            src="/figure-1.svg"
             alt="cartoonish person taking notes"
             fill
+            decoding="sync"
+            priority
           />
         </div>
         <h2 className="text-3xl leading-tight text-white font-semibold text-center">

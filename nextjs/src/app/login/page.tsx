@@ -12,9 +12,11 @@ export default function LoginPage() {
         <div className="relative aspect-square w-3/5 max-w-[400px] my-10">
           <Image
             style={{ objectFit: "contain" }}
-            src="./figure-2.svg"
+            src="figure-2.svg"
             alt="cartoonish person taking notes"
             fill
+            decoding="sync"
+            priority
           />
         </div>
         <h2 className="text-3xl leading-tight text-white font-semibold text-center">
