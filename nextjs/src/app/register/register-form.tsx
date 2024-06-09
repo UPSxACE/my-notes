@@ -17,6 +17,7 @@ import { CreateUserInput } from "@/fastify/src/types/graphql/generated";
 import { gql, useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -43,6 +44,8 @@ export default function RegisterForm() {
   const { loading, error, data } = useQuery(QUERY_HELLO);
   const [signingUp, setSigningUp] = useState(false);
   const [errorAlert, setErrorAlert] = useState("");
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -83,8 +86,8 @@ export default function RegisterForm() {
         // unexpected error
         return;
       }
-      // FIXME ok
-      console.log("OK");
+
+      return router.push("/login");
     });
   }
 
