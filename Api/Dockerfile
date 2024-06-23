@@ -26,6 +26,8 @@ LABEL "traefik.http.routers.ahnotes.tls"="true"
 LABEL "traefik.http.routers.ahnotes.tls.certresolver"="$CERTRESOLVER"
 LABEL "io.portainer.accesscontrol.public"="true"
 
+EXPOSE 8080:1337
+
 WORKDIR /app
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "Api.dll"]
