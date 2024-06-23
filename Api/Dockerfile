@@ -28,4 +28,4 @@ LABEL "io.portainer.accesscontrol.public"="true"
 
 WORKDIR /app
 COPY --from=build /app ./
-ENTRYPOINT ["dotnet", "aspnetapp.dll"]
+ENTRYPOINT ["dotnet", "Api.dll"]
