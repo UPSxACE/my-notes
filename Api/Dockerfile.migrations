@@ -11,4 +11,4 @@ ENV PATH="$PATH:/root/.dotnet/tools"
 
 # copy everything else and build app
 COPY . .
-RUN dotnet ef database update
+CMD dotnet ef database update
