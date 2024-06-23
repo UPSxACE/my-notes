@@ -26,7 +26,7 @@ LABEL "traefik.http.routers.ahnotes.tls"="true"
 LABEL "traefik.http.routers.ahnotes.tls.certresolver"="$CERTRESOLVER"
 LABEL "io.portainer.accesscontrol.public"="true"
 
-EXPOSE 8080:2000
+EXPOSE 8080
 
 WORKDIR /app
 COPY --from=build /app ./
