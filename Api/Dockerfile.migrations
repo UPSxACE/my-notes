@@ -8,8 +8,8 @@ COPY *.csproj ./
 RUN dotnet restore
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
-RUN chmod +x ./migrations.sh
 
 # copy everything else and build app
 COPY . .
+RUN chmod +x ./migrations.sh
 CMD ["./migrations.sh"]
