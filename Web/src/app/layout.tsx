@@ -18,26 +18,15 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({
   children,
-  all,
-  guest,
-  authenticated,
 }: Readonly<{
   children: React.ReactNode;
-  all: React.ReactNode;
-  guest: React.ReactNode;
-  authenticated: React.ReactNode;
 }>) {
   const session = await auth();
 
   return (
     <ApolloClientProvider>
       <html lang="en" className="scroll-smooth">
-        <body className={cn(fontSans.variable)}>
-          {all}
-          {guest}
-          {authenticated}
-          {children}
-        </body>
+        <body className={cn(fontSans.variable)}>{children}</body>
       </html>
     </ApolloClientProvider>
   );
