@@ -14,6 +14,19 @@ RUN dotnet publish -c release -o /app --no-restore
 
 # final stage/image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
+
+# Custom build arguments here
+ARG CERTRESOLVER
+ARG HOSTNAME
+
+# Set labels using build arguments
+LABEL "traefik.enable"="true"
+LABEL "traefik.http.routers.ahnotes.rule"="Host(`$HOSTNAME`)"
+LABEL "traefik.http.routers.ahnotes.entrypoints"="websecure"
+LABEL "traefik.http.routers.ahnotes.tls"="true"
+LABEL "traefik.http.routers.ahnotes.tls.certresolver"="$CERTRESOLVER"
+LABEL "io.portainer.accesscontrol.public"="true"
+
 WORKDIR /app
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "aspnetapp.dll"]
