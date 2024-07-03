@@ -24,7 +24,8 @@ LABEL "traefik.http.routers.ahnotes.rule"="Host(`$HOSTNAME`)"
 LABEL "traefik.http.routers.ahnotes.entrypoints"="websecure"
 LABEL "traefik.http.routers.ahnotes.tls"="true"
 LABEL "traefik.http.routers.ahnotes.tls.certresolver"="$CERTRESOLVER"
-LABEL "traefik.http.services.ahnotes.loadbalancer.server.port"="443"
+LABEL "traefik.http.routers.ahnotes.service"="ahnotes-svc"
+LABEL "traefik.http.services.ahnotes-svc.loadbalancer.server.port"="8080"
 LABEL "io.portainer.accesscontrol.public"="true"
 
 EXPOSE 8080
