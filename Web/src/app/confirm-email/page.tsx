@@ -21,7 +21,7 @@ export default async function ConfirmEmailPage({
   }
 
   const { state }: StateObject = await axios
-    .get("/auth/confirmation-state", {
+    .get("/confirmation-state", {
       params: {
         uid,
       },

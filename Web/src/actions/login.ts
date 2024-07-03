@@ -35,6 +35,9 @@ export default async function login(identifier: string, password: string) {
       case 404:
         error = "The user does not exist.";
         break;
+      case 403:
+        error = "Please verify your email before logging in.";
+        break;
       case 400:
         error = "Invalid username or password.";
         break;

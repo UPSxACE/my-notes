@@ -18,7 +18,7 @@ export default async function ResetPassword({
   }
 
   const { state }: StateObject = await axios
-    .get("/auth/recovery-state", {
+    .get("/recovery-state", {
       params: {
         uid: uid,
       },

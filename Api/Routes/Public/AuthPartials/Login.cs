@@ -19,13 +19,13 @@ public static partial class AuthRoutesExtension
            if (user == null) return Results.NotFound();
 
            var validPassword = Password.Verify(body.Password, user.Password ?? "");
-           if (!validPassword)
-           {
-               return Results.BadRequest();
-           }
+           if (!validPassword) return Results.BadRequest();
+
+           var verified = user?.Verified ?? false;
+           if (!verified) return Results.Forbid();
 
            var tokenBuilder = new Jwt.Token(config);
-           var token = tokenBuilder.Create(user.ID.ToString(), ["user"], "false");
+           var token = tokenBuilder.Create(user!.ID.ToString(), ["user"], "false");
 
            var cookieName = config["JWT_COOKIE_NAME"] ?? "";
            var cookieOptions = tokenBuilder.GetJwtCookieOptions(env.IsProduction());
