@@ -1,3 +1,5 @@
+using SignalRChat.Hubs;
+
 namespace Extensions;
 
 public static class AppGlobalMiddlewaresExtension
@@ -8,7 +10,12 @@ public static class AppGlobalMiddlewaresExtension
         app.UseCors("_corsPolicy");
 
         // Graphql
+        app.UseAuthentication();
+        app.UseAuthorization();
         app.MapGraphQL();
+
+        // SignalR Hubs
+        app.MapHub<TestHub>("/hubs/test");
 
         if (app.Environment.IsDevelopment())
         {

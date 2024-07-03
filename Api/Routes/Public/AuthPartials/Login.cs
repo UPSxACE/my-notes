@@ -10,11 +10,11 @@ public static partial class AuthRoutesExtension
 {
     private static void RegisterLoginRoutes(ref RouteGroupBuilder app)
     {
-        app.MapPost("/login", async (LoginBody body, Db db, HttpContext http, IConfiguration config, IHostEnvironment env) =>
+        app.MapPost("/login", async (LoginBody body, Services services, HttpContext http, IConfiguration config, IHostEnvironment env) =>
        {
-           var user = await db.Users.Where(
+           var user = await services.ExistingUser(
                x => x.Email.Equals(body.Identifier) || x.Username.Equals(body.Identifier
-           )).FirstOrDefaultAsync();
+           ));
 
            if (user == null) return Results.NotFound();
 

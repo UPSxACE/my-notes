@@ -13,7 +13,7 @@ public class Token(IConfiguration config)
     {
         // FIXME: In the future, tokens with "isDemo" set to "true" will have a shorter lifespan
         List<Claim> identityClaims = [];
-        identityClaims.Add(new Claim(ClaimTypes.NameIdentifier, id));
+        identityClaims.Add(new Claim("userId", id));
         identityClaims.Add(new Claim("isDemo", isDemo));
         foreach (var role in roles)
         {

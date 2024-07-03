@@ -27,7 +27,13 @@ const config = {
         "theme-8": "#5c419c",
         "theme-7": "#6e5df8",
         "theme-6": "#7261ff",
+        "theme-5": "#6048c3",
+        "theme-4": "#8772e2",
         "theme-1": "#e0e7ff",
+        "ligrey-2": "#fbfbfb",
+        "ligrey-1": "#ededed",
+        "ligrey-0": "#f5f5f6",
+        // generated below
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

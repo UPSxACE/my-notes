@@ -12,12 +12,10 @@ public static partial class AuthRoutesExtension
 {
     private static void RegisterRegisterRoutes(ref RouteGroupBuilder app)
     {
-        app.MapPost("/register", async (RegisterBody body, Db db, IMailer mailer) =>
+        app.MapPost("/register", async (RegisterBody body, Services services, IMailer mailer) =>
          {
              // Check existing username/email
-             var existingUser = await db.Users.Where(
-                 x => x.Email.Equals(body.Email) || x.Username.Equals(body.Username)
-             ).FirstOrDefaultAsync();
+             var existingUser = await services.ExistingUser(x => x.Email.Equals(body.Email) || x.Username.Equals(body.Username));
              if (existingUser != null)
              {
                  var conflicts = new List<string> { };
@@ -28,18 +26,11 @@ public static partial class AuthRoutesExtension
                  return Results.Conflict(conflicts);
              }
 
-             // Create new user
-             var hashedPassword = Password.Hash(body.Password);
-             var user = new UserModel
-             {
-                 Username = body.Username,
-                 Email = body.Email,
-                 Password = hashedPassword,
-                 FullName = body.FullName
-             };
+             // Create user
+             var user = await services.CreateUser(body.Username, body.Email, body.Password, body.FullName) ?? throw new Exception("Unexpected error creating user");
 
-             await db.Users.AddAsync(user);
-             await db.SaveChangesAsync();
+             // Create initial "/" folder
+             await services.CreateFolder(user.ID, "/", 0);
 
              await mailer.SendConfirmationEmail(user.ID, user.Username, user.Email);
 

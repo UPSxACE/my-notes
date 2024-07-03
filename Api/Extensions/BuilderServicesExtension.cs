@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Mail;
+using Dependencies;
 
 namespace Extensions;
 
@@ -14,7 +15,6 @@ public static class BuilderServicesExtension
 
     public static IServiceCollection RegisterAuthServices(this IServiceCollection services, IConfiguration config, bool isProduction)
     {
-
         // JWT Authentication
         var jwt_key = Encoding.ASCII.GetBytes(config["JWT_SECRET"] ?? throw new Exception("JWT_SECRET Config Missing"));
         services.AddAuthentication(authOptions =>
@@ -63,7 +63,7 @@ public static class BuilderServicesExtension
                     {
                         // FIXME: In the future, tokens with "isDemo" set to "true" wont be renewed
                         var validUntil = context.SecurityToken.ValidTo;
-                        var id = context.Principal?.FindFirst(ClaimTypes.NameIdentifier);
+                        var id = context.Principal?.FindFirst("userId");
                         var roles = context.Principal?.FindAll(ClaimTypes.Role).ToList();
                         var isDemo = context.Principal?.FindFirst("isDemo");
                         if (roles != null && id != null && isDemo != null)
@@ -106,6 +106,9 @@ public static class BuilderServicesExtension
                 .AddPolicy("admin", policy => policy.RequireRole("admin"))
                 .AddPolicy("user", policy => policy.RequireRole("user"));
 
+        // User context
+        services.AddScoped<UserContext>();
+
         return services;
     }
 
@@ -115,8 +118,12 @@ public static class BuilderServicesExtension
         var origins = new string[1] { config["CORS_ORIGIN"] ?? throw new Exception("CORS_ORIGIN Config Missing") };
         services.AddCors(options => options.AddPolicy("_corsPolicy", policy =>
         {
+            // https://developer.mozilla.org/en-US/docs/Glossary/CORS-safelisted_request_header
+
             policy.WithOrigins(origins)
-                  .WithExposedHeaders("X-Fresh-Token");
+                  .WithHeaders("Content-Type", "Content-Language", "Authorization", "Accept", "Range", "x-requested-with", "x-signalr-user-agent", "X-Automatic-Refresh") // client request
+                  .WithExposedHeaders("X-Fresh-Token") // client response
+                  .AllowCredentials();
         }));
 
         // Swagger
@@ -129,6 +136,9 @@ public static class BuilderServicesExtension
         // Mailer
         services.AddScoped<IMailer, Mailer>();
 
+        // SignalR
+        services.AddSignalR();
+
         return services;
     }
 
@@ -136,6 +146,7 @@ public static class BuilderServicesExtension
     {
         var connectionString = config["PG_CONNECTION_STRING"] ?? throw new Exception("PG_CONNECTION_STRING Config Missing");
         services.AddDbContext<Db>(options => options.UseNpgsql(connectionString).UseSnakeCaseNamingConvention());
+        services.AddScoped<Services>();
 
         if (!isProduction)
         {
@@ -149,7 +160,12 @@ public static class BuilderServicesExtension
     public static IServiceCollection RegisterGraphql(this IServiceCollection services)
     {
         services.AddGraphQLServer() // Graphql
+                .RegisterService<Db>(ServiceKind.Synchronized) // Graphql dependency injection
+                .RegisterService<Services>(ServiceKind.Synchronized) // Graphql dependency injection
+                .RegisterService<UserContext>() // Graphql dependency injection
                 .AddQueryType<Graphql.Query>() // Graphql
+                .AddMutationType<Graphql.Mutation>() // Graphql
+                .AddAuthorization() // Graphql
                 .AddApiTypes(); // Graphql Types Analyser
 
         return services;

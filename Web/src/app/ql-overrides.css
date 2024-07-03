@@ -1,0 +1,28 @@
+.ql-editor {
+  font-size: 1.25rem;
+  font-family: var(--font-sans);
+}
+
+.ql-editor strong,
+.ql-editor b {
+  font-weight: bolder;
+}
+
+.ql-editor em {
+  font-style: italic;
+}
+
+.ql-snow.ql-toolbar button,
+.ql-snow .ql-toolbar button {
+  height: 28px !important;
+  width: 32px !important;
+}
+
+.ql-size {
+  height: 28px !important;
+}
+
+.ql-picker-label {
+  display: flex !important;
+  align-items: center !important;
+}

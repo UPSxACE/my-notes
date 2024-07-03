@@ -1,0 +1,38 @@
+name: Continuous Integration
+on:
+  pull_request:
+    branches: ["main"]
+  push:
+    branches: ["main"]
+jobs:
+  # continuous-integration:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     # git clone my rep -> git checkout to the branch of the push
+  #     - uses: actions/checkout@v3
+  #     - name: Using Node.jobs
+  #       uses: actions/setup-node@v2
+  #       with:
+  #         node-version: 18.x
+  #     - name: run install, build and test
+  #       run: |
+  #         npm install
+  #         npm run build
+  #         npm run test
+  continuous-delivery:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    # needs: continuous-integration
+    steps:
+      # - name: Repo checkout
+      #   uses: action/checkout@v4
+      - name: Hatz Deploy
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{ secrets.VPS_USER }}
+          host: ${{ secrets.VPS_HOST }}
+          password: ${{ secrets.VPS_PASS }}
+          # key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ~/vyzion/_local
+            bash ./deploy-ah-notesapi.sh
