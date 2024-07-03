@@ -35,7 +35,7 @@ export default async function RootLayout({
   return (
     <WebsocketProvider>
       <ApolloClientProvider>
-        <html lang="en" className="scroll-smooth overflow-hidden">
+        <html lang="en" className="scroll-smooth">
           <body className={cn(fontSans.variable, inter.className)}>
             <RootLayoutPrivate>{children}</RootLayoutPrivate>
           </body>
