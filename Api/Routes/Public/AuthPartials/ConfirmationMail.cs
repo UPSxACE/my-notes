@@ -1,4 +1,5 @@
 
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Database;
 using FluentValidation;
@@ -55,8 +56,10 @@ public static partial class AuthRoutesExtension
             var mail = await services.ExistingConfirmationMail(x => x.Uid == body.Uid && x.Code == body.Code, user: true);
 
             if (mail == null) return Results.BadRequest();
-            if (mail.User.Verified ?? false == false)
+            var verified = mail.User.Verified ?? false;
+            if (!verified)
             {
+                mail.UsedAt = services.TimeNow();
                 mail.User.Verified = true;
                 await services.SaveChanges();
             }
@@ -77,7 +80,7 @@ public partial class ResendConfirmationValidator : AbstractValidator<ResendConfi
     }
 }
 
-public record ConfirmEmailBody(string Uid, int Code);
+public record ConfirmEmailBody(string Uid, string Code);
 public partial class ConfirmEmailValidator : AbstractValidator<ConfirmEmailBody>
 {
     public ConfirmEmailValidator()

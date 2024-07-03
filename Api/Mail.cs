@@ -27,7 +27,7 @@ public class Mailer(IConfiguration config, Db db) : IMailer
     readonly string FromEmail = config["SMTP_FROM_EMAIL"] ?? throw new Exception("SMTP_FROM_EMAIL Config Missing");
     readonly string FrontendURI = config["FRONTEND_URI"] ?? throw new Exception("FRONTEND_URI Config Missing");
 
-    private static int GenerateCode()
+    private static string GenerateCode()
     {
         string code = "";
         Random rnd = new();
@@ -37,8 +37,7 @@ public class Mailer(IConfiguration config, Db db) : IMailer
             code += num.ToString();
         }
 
-        int codeConverted = int.Parse(code);
-        return codeConverted;
+        return code;
     }
 
     // Returns a MimeMessage object, with the from, to, and subject headers filled
@@ -52,7 +51,7 @@ public class Mailer(IConfiguration config, Db db) : IMailer
         return message;
     }
 
-    private MimeEntity GetConfirmationEmailBody(string username, int code, string uid)
+    private MimeEntity GetConfirmationEmailBody(string username, string code, string uid)
     {
         var encodedUid = HttpUtility.UrlEncode(uid);
         var q = "\"";

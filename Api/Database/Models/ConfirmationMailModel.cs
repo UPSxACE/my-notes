@@ -5,7 +5,7 @@ public class ConfirmationMailModel
     public required string Uid { get; set; }
     public int UserID { get; set; }
     public int MailID { get; set; }
-    public required int Code { get; set; }
+    public required string Code { get; set; }
     public DateTime? CreatedAt { get; set; }
     public DateTime? UsedAt { get; set; }
     // Fks
