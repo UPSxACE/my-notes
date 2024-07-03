@@ -19,10 +19,10 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import formSchema from "./form-schema";
-import { useBookQuery } from "@/gql/graphql.schema";
+// import { useBookQuery } from "@/gql/graphql.schema";
 
 export default function RegisterForm() {
-  const { loading, error, data } = useBookQuery();
+  // const { loading, error, data } = useBookQuery();
   const [signingUp, setSigningUp] = useState(false);
   const [errorAlert, setErrorAlert] = useState("");
 
