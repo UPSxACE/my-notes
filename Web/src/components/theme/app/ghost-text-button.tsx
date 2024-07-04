@@ -9,7 +9,7 @@ export default function GhostTextButton(props: Props) {
       variant={"ghost"}
       {...props}
       className={twMerge(
-        "font-bold text-base ml-auto h-8 px-4",
+        "font-bold text-base ml-auto h-8 px-4 transition-all duration-300",
         props.className
       )}
     >

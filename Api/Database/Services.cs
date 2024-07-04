@@ -1,3 +1,4 @@
+using Graphql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Passwords;
@@ -73,53 +74,62 @@ public class Services(Db db)
         var user = await ExistingUser(x => x.ID == userId);
         if (user == null) return null;
 
-        // Create new folder
-        var uid = Uuid7.Id25();
-
-        var newFolder = new FolderModel
+        // Decide what folders to create (all the paths it's nested into, must exist too)
+        HashSet<string> pathsToCreate = [];
+        int range = 0;
+        foreach (char c in path)
         {
-            Id = uid,
-            Path = path,
-            Priority = priority,
-            User = user,
-        };
+            // range cannot be 0, otherwise the path is just '/'
+            if (c == '/' && range != 0)
+            {
+                var currentPath = path[..range];
+                var existing = await ExistingFolder(x => x.UserId == userId && x.Path == currentPath);
+                if (existing == null) pathsToCreate.Add(currentPath);
+            }
+            range++;
+        }
+        // in the end also add the full path of course
+        pathsToCreate.Add(path);
 
-        await db.Folders.AddAsync(newFolder);
-        await db.SaveChangesAsync();
 
-        return newFolder;
+        FolderModel? lastFolder = null;
+        foreach (var newPath in pathsToCreate)
+        {
+            // Create new folder
+            var uid = Uuid7.Id25();
+
+            var newFolder = new FolderModel
+            {
+                Id = uid,
+                Path = newPath,
+                Priority = priority,
+                User = user,
+            };
+
+            await db.Folders.AddAsync(newFolder);
+            await db.SaveChangesAsync();
+
+            lastFolder = newFolder;
+        }
+
+        return lastFolder;
     }
 
-    public async Task<List<string>> FoldersInPath(int userId, string path)
+    public async Task<List<FolderModel>> FoldersInPath(int userId, string path)
     {
-        // TODO: Reddis cache this in the future?
-        var allFolders = await ExistingFolders(x => x.UserId == userId);
+        // TODO: Reddis cache this function in the future?
+        var allFoldersInside = await ExistingFolders(x => x.UserId == userId && x.Path.StartsWith(path));
 
-        HashSet<string> possiblePaths = [];
-        allFolders.ForEach(folder =>
-        {
-            // example: if folder.Path is "/abc/def" it will add "/" then "/abc", and after the loop "/abc/def"
-            List<int> slashPositions = [];
-            int range = 0;
-            foreach (char c in folder.Path)
-            {
-                // range cannot be 0, otherwise the path is just '/'
-                if (c == '/' && range != 0) possiblePaths.Add(folder.Path[..range]);
-                range++;
-            }
-            possiblePaths.Add(folder.Path);
-        });
-
-        return possiblePaths.Where(x =>
+        return allFoldersInside.Where(x =>
         {
             // skip "/"
-            if (x == "/") return false;
+            if (x.Path == "/") return false;
             // if it starts with PATH with a / after
             // and does not have any / after that one
             // it means that its inside the PATH directory, but not nested into another directory
             // (which is what we want to return)
             var pathWithTrailingSlash = path == "/" ? "/" : path + "/";
-            return x.StartsWith(pathWithTrailingSlash) && !x.Skip(pathWithTrailingSlash.Length).Contains('/');
+            return x.Path.StartsWith(pathWithTrailingSlash) && !x.Path.Skip(pathWithTrailingSlash.Length).Contains('/');
         }).ToList();
     }
 

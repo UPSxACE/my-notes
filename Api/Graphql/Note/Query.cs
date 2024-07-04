@@ -16,6 +16,7 @@ public class NoteQueries
     private const int MAX_PAGE_SIZE = 20;
     public async Task<CursorSearch<List<Note>>> SearchNote([Service] Db db, [Service] Services services, [Service] UserContext userContext, SearchInput searchInput)
     {
+        // TODO: Create search wildcards, like path:"/"
         // TODO: Create a new order type: relevance
 
         int pageSize = Math.Max(0, Math.Min(MAX_PAGE_SIZE, searchInput.PageSize ?? DEFAULT_PAGE_SIZE));

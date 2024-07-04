@@ -25,7 +25,7 @@ public class FolderQueries
     }
 
     [Authorize(Policy = "user")]
-    public async Task<List<string>> FoldersInPath([Service] Services services, [Service] UserContext userContext, string path = "/")
+    public async Task<List<FolderModel>> FoldersInPath([Service] Services services, [Service] UserContext userContext, string path = "/")
     {
         var userId = userContext.GetUserId() ?? throw new GraphQLException("Invalid authentication");
         var folders = await services.FoldersInPath(userId, path);
@@ -64,7 +64,7 @@ public class FolderQueries
 
         var rangeStart = foldersAlreadySeen;
         var rangeEnd = foldersAlreadySeen + foldersToFetch;
-        List<string> currentPageFolders = foldersToFetch > 0 ? folders[rangeStart..rangeEnd] : [];
+        List<FolderModel> currentPageFolders = foldersToFetch > 0 ? folders[rangeStart..rangeEnd] : [];
 
         // NOTE: if only folders, still need to fetch at least one note for cursor (if there is any)
 
@@ -167,10 +167,12 @@ public class FolderQueries
             newCursor = SearchCursorPagedEncoder.EncodeCursor<object?, string?>(null, null, currentPage + 1);
         }
 
+        List<Folder> folderList = currentPageFolders.Select(x => x.ToDto()).ToList();
+
         return new PathNodes
         (
             notesList,
-            currentPageFolders, //FIXME Graphql.Folder
+            folderList,
             newCursor
         );
     }
