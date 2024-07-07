@@ -1,12 +1,21 @@
 "use client";
 
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import {
+  ApolloClient,
+  ApolloProvider,
+  InMemoryCache,
+  createHttpLink,
+} from "@apollo/client";
 import { ReactNode } from "react";
 
-const client = new ApolloClient({
+const link = createHttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL + "/graphql",
-  cache: new InMemoryCache(),
   credentials: "include",
+});
+
+const client = new ApolloClient({
+  cache: new InMemoryCache(),
+  link,
 });
 
 export default function ApolloClientProvider(props: { children: ReactNode }) {

@@ -1,6 +1,6 @@
 import { ReactNode, isValidElement } from "react";
 import { twMerge } from "tailwind-merge";
-import { LinkButton, LinkButtonProps } from "../_custom/link-button";
+import { LinkButton, LinkButtonProps } from "../_ui/link-button";
 import LoadingSpinner from "../theme/loading-spinner";
 
 export type BaseLinkProps = LinkButtonProps & {

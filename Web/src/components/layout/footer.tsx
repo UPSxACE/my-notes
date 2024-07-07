@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
-import { LinkButton } from "../_custom/link-button";
+import { LinkButton } from "../_ui/link-button";
 
 export default function Footer() {
   // border-zinc-400
