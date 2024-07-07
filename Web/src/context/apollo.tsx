@@ -3,12 +3,12 @@
 import {
   ApolloClient,
   ApolloProvider,
+  HttpLink,
   InMemoryCache,
-  createHttpLink,
 } from "@apollo/client";
 import { ReactNode } from "react";
 
-const link = createHttpLink({
+const link = new HttpLink({
   uri: process.env.NEXT_PUBLIC_API_URL + "/graphql",
   credentials: "include",
 });
