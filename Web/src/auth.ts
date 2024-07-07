@@ -4,11 +4,14 @@ import Credentials from "next-auth/providers/credentials";
 import "server-only";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
-  // cookies: {
-  //   sessionToken: {
-  //     name: "next-auth.session-token"
-  //   },
-  // },
+  cookies: {
+    sessionToken: {
+      // name: "next-auth.session-token"
+      options: {
+        domain: process.env.JWT_COOKIE_DOMAIN,
+      },
+    },
+  },
   callbacks: {
     // TODO: Study about this
     async session({ session, token }) {
