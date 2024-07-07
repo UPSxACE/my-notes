@@ -16,6 +16,7 @@ const link = createHttpLink({
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link,
+  credentials: "include",
 });
 
 export default function ApolloClientProvider(props: { children: ReactNode }) {
