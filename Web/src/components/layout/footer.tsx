@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FaFacebookF, FaInstagram, FaTwitter } from "react-icons/fa";
-import { Button } from "../ui/button";
+import { LinkButton } from "../_custom/link-button";
 
 export default function Footer() {
   // border-zinc-400
@@ -23,15 +23,14 @@ export default function Footer() {
         />
       </Link>
       <div className="flex gap-4 h-[60px]  items-center">
-        <Button
-          asChild
+        <LinkButton
+          href="https://facebook.com/vyzion.pt"
+          target="_blank"
           variant="outline"
           className="rounded-full p-0 w-[40px] h-[40px] !bg-blue-500 !text-white border-none hover:text-2xl hover:w-[60px] hover:h-[60px] transition-all duration-200"
         >
-          <Link href="https://facebook.com/vyzion.pt" target="_blank">
-            <FaFacebookF />
-          </Link>
-        </Button>
+          <FaFacebookF />
+        </LinkButton>
 
         {/* <Button
           asChild
@@ -51,24 +50,22 @@ export default function Footer() {
           />
         </Link> */}
         {/* </Button> */}
-        <Button
-          asChild
+        <LinkButton
+          href="https://twitter.com/vyzion_pt"
+          target="_blank"
           variant="outline"
           className="rounded-full p-0 w-[40px] h-[40px] !bg-[#e15c3e] !text-white border-none hover:text-2xl hover:w-[60px] hover:h-[60px] transition-all duration-200 text-lg"
         >
-          <Link href="https://twitter.com/vyzion_pt" target="_blank">
-            <FaInstagram />
-          </Link>
-        </Button>
-        <Button
-          asChild
+          <FaInstagram />
+        </LinkButton>
+        <LinkButton
+          href="https://twitter.com/vyzion_pt"
+          target="_blank"
           variant="outline"
           className="rounded-full p-0 w-[40px] h-[40px] !bg-blue-400 !text-white border-none hover:text-2xl hover:w-[60px] hover:h-[60px] transition-all duration-200"
         >
-          <Link href="https://twitter.com/vyzion_pt" target="_blank">
-            <FaTwitter />
-          </Link>
-        </Button>
+          <FaTwitter />
+        </LinkButton>
       </div>
       {/* <div className="flex gap-4 text-xl text-white">
         <Link href="/">Home</Link>

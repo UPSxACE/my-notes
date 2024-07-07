@@ -12,7 +12,8 @@ input {
    License: none (public domain)
 */
 
-html,
+/* NOTE: This one breaks some styles due to its specificity, so i removed it */
+/* html,
 body,
 div,
 span,
@@ -99,7 +100,7 @@ video {
   font-size: 100%;
   font: inherit;
   vertical-align: baseline;
-}
+} */
 /* HTML5 display-role reset for older browsers */
 article,
 aside,

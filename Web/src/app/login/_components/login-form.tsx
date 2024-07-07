@@ -2,7 +2,7 @@
 
 import login from "@/actions/login";
 import { ErrorAlert } from "@/components/alerts/error-alert";
-import LightInput from "@/components/theme/input";
+import LightInput from "@/components/theme/light-input";
 import LightButton from "@/components/theme/light-button";
 import LoadingSpinner from "@/components/theme/loading-spinner";
 import {
@@ -102,17 +102,16 @@ export default function LoginForm() {
           Forgot your password?
         </Link>
         <LightButton
-          disabled={signingIn}
-          className="transition-all duration-150"
-        >
-          {signingIn ? (
-            <>
+          loading={signingIn}
+          loadingComponent={
+            <span className="flex">
               <LoadingSpinner className="w-5 h-5 mr-2" />
               Attempting to sign in...
-            </>
-          ) : (
-            <>SIGN IN</>
-          )}
+            </span>
+          }
+          className="transition-all duration-150"
+        >
+          SIGN IN
         </LightButton>
         <Link
           href="/register"

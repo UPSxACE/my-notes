@@ -1,0 +1,8 @@
+mutation createFolder($input: CreateFolderInput!) {
+  createFolder(createFolderInput: $input) {
+    id
+    path
+    priority
+    userId
+  }
+}

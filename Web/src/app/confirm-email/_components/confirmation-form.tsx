@@ -82,17 +82,17 @@ export default function ConfirmationForm(props: Props) {
       </InputOTP>
       {error && <span className="mb-3 text-red-500 text-sm">{error}</span>}
       <LightButton
-        disabled={value.length !== 6 || isSubmiting}
-        className="w-full max-w-[400px] mb-3 mt-1 transition-all duration-150"
-      >
-        {isSubmiting ? (
-          <>
+        loading={isSubmiting}
+        loadingComponent={
+          <span className="flex">
             <LoadingSpinner className="w-5 h-5 mr-2" />
             Attempting to verify...
-          </>
-        ) : (
-          <>CONTINUE</>
-        )}
+          </span>
+        }
+        disabled={value.length !== 6}
+        className="w-full max-w-[400px] mb-3 mt-1 transition-all duration-150"
+      >
+        CONTINUE
       </LightButton>
     </form>
   );

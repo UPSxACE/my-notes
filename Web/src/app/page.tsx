@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
+import BaseInput from "@/components/base-components/base-input";
 import CtaButton from "@/components/theme/app/cta-button";
-import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import CtaLink from "@/components/theme/app/cta-link";
 import { FaChevronDown } from "react-icons/fa";
 import { LuSearch } from "react-icons/lu";
 import HomePageGuest from "./page-guest";
@@ -17,9 +17,9 @@ export default async function HomePage() {
     <main className="font-sans bg-ligrey-0 flex-1 p-6">
       <div className="flex gap-2">
         <div className="flex">
-          <CtaButton asChild className="rounded-r-none px-3">
-            <Link href="/notes/create">Create</Link>
-          </CtaButton>
+          <CtaLink href="/notes/create" className="rounded-r-none px-3">
+            Create
+          </CtaLink>
           <CtaButton className="rounded-l-none px-2 border-l-gray-200 border-solid border-l">
             <span>
               <FaChevronDown />
@@ -30,7 +30,7 @@ export default async function HomePage() {
           <span className="select-none text-xl">
             <LuSearch />
           </span>
-          <Input
+          <BaseInput
             placeholder="Search"
             className="focus-visible:outline-none border-none focus-visible:ring-0 focus-visible:ring-offset-0 text-base p-0 px-[0.4rem]"
           />

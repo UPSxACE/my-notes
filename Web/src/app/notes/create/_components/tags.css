@@ -3,7 +3,7 @@
   position: relative;
   padding: 0.5rem 0.25rem 0.25rem 0.5rem;
   /* border: 1px solid #ededed; */
-  border: 1px solid #a3a3a3;
+  border: 1px solid #d4d4d4;
   border-radius: 6px;
   /* background: #ffffff; */
   /* shared font styles */
@@ -11,6 +11,10 @@
   line-height: 1.2;
   /* clicking anywhere will focus the input */
   cursor: text;
+}
+
+.react-tags:hover {
+  border-color: #8772e2;
 }
 
 .react-tags.is-active {
@@ -159,6 +163,12 @@
   color: #7c7d86;
   cursor: not-allowed;
   pointer-events: none;
+}
+
+/** REVIEW: Workaround to make options disappear after selected, 
+until i figure out why the component is rerendering and resetting scroll */
+.react-tags__listbox-option[aria-selected="true"] {
+  display: none;
 }
 
 .react-tags__listbox-option[aria-selected="true"]::after {

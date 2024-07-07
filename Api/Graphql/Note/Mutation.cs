@@ -25,9 +25,11 @@ public class NoteMutations
         var uid = Uuid7.Id25();
 
         // add folders and tags
-        var newNote = await services.CreateNote(user.ID, createNoteInput.FolderPath, createNoteInput.Tags, createNoteInput.Title, createNoteInput.Content, createNoteInput.ContentText, createNoteInput.Priority);
-
-        if (newNote == null) throw new GraphQLException("Unexpected error creating note");
+        var newNote = await services.CreateNote(user.ID, createNoteInput.FolderPath, createNoteInput.Tags,
+                                                    createNoteInput.Title, createNoteInput.Content,
+                                                    createNoteInput.ContentText,
+                                                    createNoteInput.Priority
+                                                ) ?? throw new GraphQLException("Unexpected error creating note");
 
         return await newNote.ToDto(services);
     }

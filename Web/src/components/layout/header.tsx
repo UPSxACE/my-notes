@@ -1,5 +1,5 @@
 import Link from "next/link";
-import CtaButton from "../theme/cta-button";
+import CtaLink from "../theme/app/cta-link";
 
 export default function Header() {
   return (
@@ -14,9 +14,9 @@ export default function Header() {
         <Link className="px-2" href="/#features">
           Features
         </Link>
-        <CtaButton className="ml-2 rounded-full" asChild>
-          <Link href="/login">Sign In</Link>
-        </CtaButton>
+        <CtaLink href="/login" className="ml-2 rounded-full">
+          Sign In
+        </CtaLink>
       </nav>
     </header>
   );

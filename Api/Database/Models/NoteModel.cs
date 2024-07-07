@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using NpgsqlTypes;
 
 namespace Database;
+// TODO: implement lastview_at
 public class NoteModel
 {
     // REVIEW: Analyse later if there isn't a better option (would DI work here somehow?)

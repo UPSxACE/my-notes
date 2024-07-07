@@ -1,8 +1,7 @@
 import ImageSync from "@/components/image-sync";
 import Footer from "@/components/layout/footer";
 import Header from "@/components/layout/header";
-import CtaButton from "@/components/theme/cta-button";
-import Link from "next/link";
+import CtaLink from "@/components/theme/app/cta-link";
 import { IoMdChatboxes } from "react-icons/io";
 
 export default function HomePageGuest() {
@@ -26,13 +25,13 @@ export default function HomePageGuest() {
               keep their notes organized. You can also set goals, manage your
               daily tasks, and setup alarms.
             </p>
-            <CtaButton
-              asChild
+            <CtaLink
+              href="/register"
               className="rounded-full text-base mt-4"
               size="lg"
             >
-              <Link href="/register">Start Using</Link>
-            </CtaButton>
+              Start Using
+            </CtaLink>
           </div>
           <div className="text-white absolute left-0 top-[calc(100%-((((80vw-3rem)*0.8)/1.5)*0.3))] xl:top-[calc(100%-((((1280px-3rem)*0.8)/1.5)*0.3))] w-full h-[calc(((80vw-3rem)*0.8)/1.5)] xl:h-[calc((1280px-3rem)*0.8/1.5)] flex justify-center">
             <div className="relative h-full w-[calc((80vw-3rem)*0.8)] xl:w-[calc((1280px-3rem)*0.8)]">

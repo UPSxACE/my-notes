@@ -1,11 +1,9 @@
 import { twMerge } from "tailwind-merge";
-import { Button, ButtonProps } from "../ui/button";
+import BaseButton, { BaseButtonProps } from "../base-components/base-button";
 
-interface Props extends ButtonProps {}
-
-export default function LightButton(props: Props) {
+export default function LightButton(props: BaseButtonProps) {
   return (
-    <Button
+    <BaseButton
       {...props}
       className={twMerge(
         "h-12 text-base bg-theme-7 hover:bg-theme-9",

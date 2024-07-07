@@ -1,6 +1,6 @@
 "use client";
 import { ErrorAlert } from "@/components/alerts/error-alert";
-import LightInput from "@/components/theme/input";
+import LightInput from "@/components/theme/light-input";
 import LightButton from "@/components/theme/light-button";
 import LoadingSpinner from "@/components/theme/loading-spinner";
 import {
@@ -103,17 +103,16 @@ export default function ForgotPassword() {
                 />
                 <div className="w-full">
                   <LightButton
-                    disabled={isSubmiting}
-                    className="w-full transition-all duration-150 mb-3"
-                  >
-                    {isSubmiting ? (
-                      <>
+                    loading={isSubmiting}
+                    loadingComponent={
+                      <span className="flex">
                         <LoadingSpinner className="w-5 h-5 mr-2" />
                         Attempting to resend...
-                      </>
-                    ) : (
-                      <>CONTINUE</>
-                    )}
+                      </span>
+                    }
+                    className="w-full transition-all duration-150 mb-3"
+                  >
+                    <>CONTINUE</>
                   </LightButton>
                   <Link
                     href="/login"

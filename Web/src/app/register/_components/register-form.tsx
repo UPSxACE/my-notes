@@ -2,8 +2,8 @@
 
 import register from "@/actions/register";
 import { ErrorAlert } from "@/components/alerts/error-alert";
-import LightInput from "@/components/theme/input";
 import LightButton from "@/components/theme/light-button";
+import LightInput from "@/components/theme/light-input";
 import LoadingSpinner from "@/components/theme/loading-spinner";
 import {
   Form,
@@ -12,7 +12,6 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { useQuery } from "@apollo/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useState } from "react";
@@ -155,17 +154,16 @@ export default function RegisterForm() {
           terms and conditions.
         </p>
         <LightButton
-          disabled={signingUp}
-          className="transition-all duration-150"
-        >
-          {signingUp ? (
-            <>
+          loading={signingUp}
+          loadingComponent={
+            <span className="flex">
               <LoadingSpinner className="w-5 h-5 mr-2" />
               Attempting to sign up...
-            </>
-          ) : (
-            <>JOIN NOW</>
-          )}
+            </span>
+          }
+          className="transition-all duration-150"
+        >
+          JOIN NOW
         </LightButton>
         <Link
           href="/login"

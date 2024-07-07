@@ -1,7 +1,7 @@
 "use client";
 
 import { HubConnectionBuilder, HubConnectionState } from "@microsoft/signalr";
-import { createContext, useEffect, useRef } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 
 type Props = { children: React.ReactNode };
 
@@ -13,6 +13,7 @@ export const WebsocketContext = createContext(ws);
 
 export default function WebsocketProvider(props: Props) {
   const { current: connection } = useRef(ws);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const messageReceived = (data: any, data2: any) => {
@@ -21,7 +22,10 @@ export default function WebsocketProvider(props: Props) {
 
     connection.on("messageReceived", messageReceived);
     if (connection.state === HubConnectionState.Disconnected)
-      connection.start();
+      connection.start().catch((error) => {
+        console.log(error);
+        setError(error);
+      });
 
     console.log(connection);
 

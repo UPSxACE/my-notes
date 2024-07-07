@@ -49,6 +49,8 @@ public class CreateFolderInputValidator : AbstractValidator<CreateFolderInput>
             if (x.Equals("/")) return false;
             if (!x.StartsWith('/')) return false;
             if (x.Contains("//")) return false;
+            if (x.Contains('\\')) return false;
+            if (x.Contains('.')) return false;
             return true;
         }).WithMessage("Please choose a valid path.");
         RuleFor(x => x.Path).Must(x =>

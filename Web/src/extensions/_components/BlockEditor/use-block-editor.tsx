@@ -24,8 +24,6 @@ export default function useBlockEditor(config: Config) {
 
       setJson(json);
       setText(text);
-
-      console.log(json, text);
     },
   });
 

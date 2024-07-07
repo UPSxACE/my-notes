@@ -1,0 +1,8 @@
+query ownFolders {
+  ownFolders {
+    id
+    path
+    priority
+    userId
+  }
+}

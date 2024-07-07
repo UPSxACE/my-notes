@@ -5,6 +5,16 @@ using NpgsqlTypes;
 namespace Database;
 public class NoteTagModel
 {
+    public Graphql.NoteTag ToDto()
+    {
+        return new Graphql.NoteTag
+        {
+            Id = Id,
+            Name = Name,
+            UserId = UserId,
+        };
+    }
+
     [Key] // v7
     [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public required string Id { get; set; }
@@ -13,4 +23,6 @@ public class NoteTagModel
 
     // Fks
     public virtual required UserModel User { get; set; }
+
+
 }

@@ -133,6 +133,11 @@ public class Services(Db db)
         }).ToList();
     }
 
+    public async Task<List<NoteTagModel>> ExistingNoteTags(System.Linq.Expressions.Expression<Func<NoteTagModel, bool>> predicate)
+    {
+        return await db.NoteTags.Where(predicate).ToListAsync();
+    }
+
     public async Task<NoteModel?> ExistingNote(System.Linq.Expressions.Expression<Func<NoteModel, bool>> predicate)
     {
         return await db.Notes.Where(predicate).FirstOrDefaultAsync();
