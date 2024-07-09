@@ -34,12 +34,12 @@ public class FolderQueries
     }
 
     [Authorize(Policy = "user")]
-    public async Task<PathNodes> Navigate([Service] Db db, [Service] Services services, [Service] UserContext userContext, FoldersInPathInput input)
+    public async Task<PathNodes> Navigate([Service] Db db, [Service] Services services, [Service] UserContext userContext, NavigateInput input)
     {
         var userId = userContext.GetUserId() ?? throw new GraphQLException("Invalid authentication");
 
         // validate
-        var validator = new FoldersInPathInputValidator();
+        var validator = new NavigateInputValidator();
         var result = validator.Validate(input);
         if (!result.IsValid) throw new GraphQLException(result.Errors[0].ErrorMessage);
 
@@ -161,8 +161,9 @@ public class FolderQueries
         List<Note> notesList = [];
         foreach (var x in notes[..Math.Min(maxNotesToFetch, notes.Count)]) notesList.Add(await x.ToDto(services));
 
+        var foldersLeftAfterFetch = foldersLeft - foldersToFetch;
         //if 0 notes, but still have folders left to fetch, create cursor with next page
-        if (newCursor == null && foldersLeft > 0)
+        if (newCursor == null && foldersLeftAfterFetch > 0)
         {
             newCursor = SearchCursorPagedEncoder.EncodeCursor<object?, string?>(null, null, currentPage + 1);
         }
@@ -178,10 +179,10 @@ public class FolderQueries
     }
 }
 
-public record FoldersInPathInput(string? Cursor, string? OrderBy, string? Direction, int? PageSize, string Path = "/");
-public class FoldersInPathInputValidator : AbstractValidator<FoldersInPathInput>
+public record NavigateInput(string? Cursor, string? OrderBy, string? Direction, int? PageSize, string Path = "/");
+public class NavigateInputValidator : AbstractValidator<NavigateInput>
 {
-    public FoldersInPathInputValidator()
+    public NavigateInputValidator()
     {
         RuleFor(x => x.Path).MaximumLength(511).WithMessage("Path is too long.");
         RuleFor(x => x.Path).Must(x =>
