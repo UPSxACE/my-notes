@@ -3,10 +3,9 @@
 import ImageBlockMenu from "@/extensions/ImageBlock/components/ImageBlockMenu";
 import { ColumnsMenu } from "@/extensions/MultiColumn/menus";
 import { TableColumnMenu, TableRowMenu } from "@/extensions/Table/menus";
-import ExtensionKit from "@/extensions/extension-kit";
 import "@/styles/index.css";
-import { Editor, EditorContent, useEditor } from "@tiptap/react";
-import { RefObject } from "react";
+import { Editor, EditorContent } from "@tiptap/react";
+import { KeyboardEvent, RefObject } from "react";
 import { ContentItemMenu, LinkMenu, TextMenu } from "../menus";
 
 type Props = {
@@ -19,9 +18,21 @@ export const BlockEditor = ({ editor, containerRef }: Props) => {
     return null;
   }
 
+  // NOTE: Not a good practice to override the tab functionality
+  function handleTab(e: KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Tab") {
+      e.preventDefault();
+      editor?.commands.insertContent("    ");
+    }
+  }
+
   return (
     <div>
-      <EditorContent className="[&>.ProseMirror]:py-8" editor={editor} />
+      <EditorContent
+        onKeyDown={handleTab}
+        className="[&>.ProseMirror]:py-8"
+        editor={editor}
+      />
       <ContentItemMenu editor={editor} />
       <LinkMenu editor={editor} appendTo={containerRef} />
       <TextMenu editor={editor} />

@@ -88,7 +88,10 @@ type BreadcumbItemObj = {
 };
 
 function breadcrumbsMatcher(path: string): BreadcumbItemObj[] {
-  switch (path) {
+  let generalizedPath = path;
+  if (path.startsWith("/notes/view")) generalizedPath = "/notes/view";
+
+  switch (generalizedPath) {
     case "/":
       return [{ name: "Notes", link: "/", active: true }];
     case "/notes/create":
@@ -97,6 +100,15 @@ function breadcrumbsMatcher(path: string): BreadcumbItemObj[] {
         {
           name: "Create",
           link: "/notes/create",
+          active: true,
+        },
+      ];
+    case "/notes/view":
+      return [
+        { name: "Notes", link: "/" },
+        {
+          name: "View Note",
+          link: path,
           active: true,
         },
       ];

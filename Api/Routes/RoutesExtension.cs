@@ -15,11 +15,11 @@ public static class RoutesExtension
 
         // Private Routes
         app.MapGroup("/")
+            .MapNoteRoutes()
             .AddEndpointFilter(async (context, next) =>
             {
                 return await next(context);
             }).RequireAuthorization("user");
-        // .MapProfileRoutes()
 
         return app;
     }

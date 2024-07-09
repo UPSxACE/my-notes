@@ -6,10 +6,11 @@ import { Button, ButtonProps } from "../ui/button";
 export type BaseButtonProps = ButtonProps & {
   loading?: boolean;
   loadingComponent?: ReactNode;
+  grey?: boolean;
 };
 
 export default function BaseButton(props: BaseButtonProps) {
-  const { loading, loadingComponent, asChild, ...restProps } = props;
+  const { grey, loading, loadingComponent, asChild, ...restProps } = props;
 
   const renderCustomLoading = loading && loadingComponent;
 
@@ -23,7 +24,11 @@ export default function BaseButton(props: BaseButtonProps) {
     <Button
       disabled={loading}
       {...restProps}
-      className={twMerge("relative overflow-hidden", props.className)}
+      className={twMerge(
+        "relative overflow-hidden",
+        grey && "bg-gray-150 hover:bg-neutral-200 text-black",
+        props.className
+      )}
     >
       <div
         className={twMerge(

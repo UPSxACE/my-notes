@@ -23,6 +23,7 @@ const config = {
         sans: ["var(--font-sans)", ...fontFamily.sans],
       },
       colors: {
+        "gray-150": "#f4f4f4",
         "theme-9": "#41347a",
         "theme-8": "#5c419c",
         "theme-7": "#6e5df8",

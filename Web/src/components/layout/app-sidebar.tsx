@@ -32,8 +32,13 @@ export default function AppSidebar() {
 }
 
 function isVisible(path: string) {
-  switch (path) {
+  let generalizedPath = path;
+  if (path.startsWith("/notes/view")) generalizedPath = "/notes/view";
+
+  switch (generalizedPath) {
     case "/notes/create":
+      return false;
+    case "/notes/view":
       return false;
     default:
       return true;
