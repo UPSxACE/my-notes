@@ -1,5 +1,6 @@
 "use client";
 
+import { NavigateInput, PathNodes } from "@/gql/graphql";
 import {
   ApolloClient,
   ApolloProvider,
@@ -14,7 +15,28 @@ const link = new HttpLink({
 });
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    typePolicies: {
+      Query: {
+        fields: {
+          navigate: {
+            keyArgs: ["input", ["path"]], // REVIEW
+            merge: (
+              existing: PathNodes = { folders: [], notes: [] },
+              incoming: PathNodes,
+              { args }: { [key: string]: any; args: NavigateInput | null }
+            ) => {
+              return {
+                cursor: incoming.cursor,
+                folders: [...existing.folders, ...incoming.folders],
+                notes: [...existing.notes, ...incoming.notes],
+              };
+            },
+          },
+        },
+      },
+    },
+  }),
   link,
   credentials: "include",
 });

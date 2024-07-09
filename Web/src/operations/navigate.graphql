@@ -1,0 +1,23 @@
+query navigate($input: NavigateInput!) {
+  navigate(input: $input) {
+    cursor
+    notes {
+      content
+      contentText
+      createdAt
+      folder
+      id
+      priority
+      tags
+      title
+      userId
+      views
+    }
+    folders {
+      id
+      path
+      priority
+      userId
+    }
+  }
+}
