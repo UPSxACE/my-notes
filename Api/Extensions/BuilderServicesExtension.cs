@@ -36,7 +36,7 @@ public static class BuilderServicesExtension
                     if (header != null && header.StartsWith("Bearer "))
                     {
                         tokenSource = "header";
-                        header = header.Remove(7); // Remove "Bearer "
+                        header = header.Remove(0, 7); // Remove "Bearer "
                         context.Token = header;
                     }
                     if (cookie != null)
