@@ -3,10 +3,10 @@
 import ImageBlockMenu from "@/extensions/ImageBlock/components/ImageBlockMenu";
 import { ColumnsMenu } from "@/extensions/MultiColumn/menus";
 import { TableColumnMenu, TableRowMenu } from "@/extensions/Table/menus";
-import "@/styles/index.css";
 import { Editor, EditorContent } from "@tiptap/react";
 import { KeyboardEvent, RefObject } from "react";
 import { ContentItemMenu, LinkMenu, TextMenu } from "../menus";
+import "@/styles/index.css";
 
 type Props = {
   editor: Editor | null;

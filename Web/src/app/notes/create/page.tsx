@@ -7,14 +7,12 @@ import { useCreateNoteMutation } from "@/gql/graphql.schema";
 import getGqlErrorMessage from "@/utils/get-gql-error";
 import { notifyError } from "@/utils/toaster-notifications";
 import clsx from "clsx";
-import hljs from "highlight.js";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
 import { TagSuggestion } from "react-tag-autocomplete";
 import TextareaAutosize from "react-textarea-autosize";
 import Sidebar from "./_components/sidebar";
-hljs.configure({ languages: ["javascript"] });
 
 const inter = Inter({
   subsets: ["latin"],
