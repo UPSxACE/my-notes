@@ -4,9 +4,9 @@ import CtaButton from "@/components/theme/app/cta-button";
 import CtaLink from "@/components/theme/app/cta-link";
 import { FaChevronDown } from "react-icons/fa";
 import { LuSearch } from "react-icons/lu";
+import Notes from "./_components/notes";
 import NotesListContextProvider from "./_components/notes-list-context";
 import HomePageGuest from "./page-guest";
-import Notes from "./_components/notes";
 
 export default async function HomePage() {
   const session = await auth();

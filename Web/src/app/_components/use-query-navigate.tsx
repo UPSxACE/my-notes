@@ -32,7 +32,6 @@ export default function useQueryNavigate(opts: Options = {}) {
 
   function _fetchMore() {
     if (endOfResults) return;
-
     fetchMore({
       variables: {
         input: options,

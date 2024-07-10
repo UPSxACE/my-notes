@@ -106,7 +106,7 @@ public class NoteQueries
         {
             DecodedSearchCursor<long, string>? cursor;
             cursor = SearchCursorEncoder.DecodeCursor<long, string>(searchInput?.Cursor);
-            DateTime? cursorTime = cursor != null ? new DateTime(cursor.Cursor1) : null;
+            DateTime? cursorTime = cursor != null ? new DateTime(cursor.Cursor1).ToUniversalTime() : null;
 
             if (cursor != null && direction == "asc")
                 filteredNotes = filteredNotes.Where(x => x.CreatedAt >= cursorTime && x.Id.CompareTo(cursor.Cursor2) >= 0);

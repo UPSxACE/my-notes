@@ -32,8 +32,8 @@ export default function BaseButton(props: BaseButtonProps) {
     >
       <div
         className={twMerge(
-          "relative top-0 transition-all duration-200",
-          loading && !renderCustomLoading && "top-[-120%]"
+          "relative translate-y-0 transition-all duration-200",
+          loading && !renderCustomLoading && "-translate-y-full py-[inherit]"
         )}
       >
         {renderCustomLoading ? loadingComponent : props.children}
@@ -41,8 +41,8 @@ export default function BaseButton(props: BaseButtonProps) {
       {!loadingComponent && (
         <div
           className={twMerge(
-            "absolute w-full h-full flex justify-center items-center top-[120%] transition-all duration-200",
-            loading && "top-0"
+            "absolute w-full h-full flex justify-center items-center translate-y-full py-[inherit] transition-all duration-200",
+            loading && "translate-y-0"
           )}
         >
           <LoadingSpinner className="w-5 h-5" />

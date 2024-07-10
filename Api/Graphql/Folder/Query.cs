@@ -113,8 +113,8 @@ public class FolderQueries
             if (cursor != null && direction == "desc")
                 filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) <= 0 && x.Id.CompareTo(cursor.Cursor2) <= 0);
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == pageSize + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[pageSize].Title, notes[pageSize].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].Title, notes[maxNotesToFetch].Id, currentPage + 1);
         }
 
         if (orderBy == "priority")
@@ -126,8 +126,8 @@ public class FolderQueries
             if (cursor != null && direction == "desc")
                 filteredNotes = filteredNotes.Where(x => x.Priority <= cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0);
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == pageSize + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[pageSize].Priority, notes[pageSize].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].Priority, notes[maxNotesToFetch].Id, currentPage + 1);
         }
 
         if (orderBy == "views")
@@ -139,23 +139,23 @@ public class FolderQueries
             if (cursor != null && direction == "desc")
                 filteredNotes = filteredNotes.Where(x => x.Views <= cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0);
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == pageSize + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[pageSize].Views, notes[pageSize].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].Views, notes[maxNotesToFetch].Id, currentPage + 1);
         }
 
         if (orderBy == "createdat")
         {
             DecodedSearchCursorPaged<long, string>? cursor;
             cursor = SearchCursorPagedEncoder.DecodeCursor<long, string>(input?.Cursor);
-            DateTime? cursorTime = cursor != null ? new DateTime(cursor.Cursor1) : null;
+            DateTime? cursorTime = cursor != null ? new DateTime(cursor.Cursor1).ToUniversalTime() : null;
 
             if (cursor != null && direction == "asc")
                 filteredNotes = filteredNotes.Where(x => x.CreatedAt >= cursorTime && x.Id.CompareTo(cursor.Cursor2) >= 0);
             if (cursor != null && direction == "desc")
                 filteredNotes = filteredNotes.Where(x => x.CreatedAt <= cursorTime && x.Id.CompareTo(cursor.Cursor2) <= 0);
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == pageSize + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[pageSize].CreatedAt?.Ticks ?? DateTime.MinValue.Ticks, notes[pageSize].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].CreatedAt?.Ticks ?? DateTime.MinValue.Ticks, notes[maxNotesToFetch].Id, currentPage + 1);
         }
 
         List<Note> notesList = [];
