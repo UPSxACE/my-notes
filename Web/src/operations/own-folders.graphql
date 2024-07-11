@@ -4,5 +4,7 @@ query ownFolders {
     path
     priority
     userId
+    lastNoteAdded
+    notesCount
   }
 }
