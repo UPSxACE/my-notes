@@ -31,7 +31,7 @@ public class NoteMutations
                                                     createNoteInput.Priority
                                                 ) ?? throw new GraphQLException("Unexpected error creating note");
 
-        return await newNote.ToDto(services);
+        return newNote.ToDto();
     }
 }
 

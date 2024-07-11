@@ -5,7 +5,7 @@ loadEnvConfig(process.cwd());
 const config: CodegenConfig = {
   overwrite: true,
   schema: process.env.GPL_SCHEMA_URL,
-  documents: "src/**/*.{ts,tsx,gql,graphql}",
+  documents: "src/operations/*.{ts,tsx,gql,graphql}",
   generates: {
     "src/gql/": {
       preset: "client",

@@ -11,7 +11,7 @@ export default function AppSidebar() {
   return (
     <aside
       className={clsx(
-        "font-sans max-h-screen overflow-hidden transition-all duration-500",
+        "sticky top-0 font-sans max-h-screen overflow-hidden transition-all duration-500",
         show ? "w-[300px] opacity-100" : "w-0 opacity-0"
       )}
     >

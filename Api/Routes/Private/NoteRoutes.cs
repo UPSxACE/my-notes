@@ -9,9 +9,9 @@ public static class NoteRoutesExtension
     {
         app.MapGroup("/notes").MapGet("/{noteId}", async (string noteId, Services services, UserContext user) =>
         {
-            var note = await services.ExistingNote(x => x.UserId == user.GetUserId() && x.Id == noteId && x.Deleted == false);
+            var note = await services.ExistingNote(x => x.UserId == user.GetUserId() && x.Id == noteId && x.Deleted == false, true, true);
             if (note == null) return Results.NotFound();
-            return Results.Ok(await note.ToDto(services));
+            return Results.Ok(note.ToDto());
         });
         return app;
     }

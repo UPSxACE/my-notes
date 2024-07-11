@@ -1,3 +1,3 @@
 namespace Graphql;
 
-public record struct Folder(string Id, int UserId, string Path, int Priority);
+public record struct Folder(string Id, int UserId, string Path, int Priority, int NotesCount, DateTime? LastNoteAdded);

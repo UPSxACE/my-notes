@@ -5,7 +5,7 @@ using NpgsqlTypes;
 namespace Database;
 public class FolderModel
 {
-    public Graphql.Folder ToDto()
+    public Graphql.Folder ToDto(int notesCount, DateTime? lastNoteAdded)
     {
         return new Graphql.Folder
         {
@@ -13,6 +13,8 @@ public class FolderModel
             Path = Path,
             UserId = UserId,
             Priority = Priority,
+            NotesCount = notesCount,
+            LastNoteAdded = lastNoteAdded
         };
     }
 

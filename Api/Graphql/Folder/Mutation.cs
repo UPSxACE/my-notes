@@ -32,7 +32,9 @@ public class FolderMutations()
         var newFolder = await services.CreateFolder(user.ID, createFolderInput.Path, createFolderInput.Priority);
         if (newFolder == null) throw new GraphQLException("Unexpected error creating folder");
 
-        return newFolder.ToDto();
+        var notes = await services.ExistingNotes(x => x.FolderId == newFolder.Id);
+
+        return newFolder.ToDto(notes.Count, notes.LastOrDefault()?.CreatedAt ?? null);
     }
 }
 

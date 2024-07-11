@@ -138,9 +138,20 @@ public class Services(Db db)
         return await db.NoteTags.Where(predicate).ToListAsync();
     }
 
-    public async Task<NoteModel?> ExistingNote(System.Linq.Expressions.Expression<Func<NoteModel, bool>> predicate)
+    public async Task<NoteModel?> ExistingNote(System.Linq.Expressions.Expression<Func<NoteModel, bool>> predicate, bool folder = false, bool noteTags = false)
     {
-        return await db.Notes.Where(predicate).FirstOrDefaultAsync();
+        IQueryable<NoteModel> x = db.Notes;
+        if (folder) x = x.Include(x => x.Folder);
+        if (noteTags) x = x.Include(x => x.NoteTags!).ThenInclude(x => x.NoteTag);
+        return await x.Where(predicate).FirstOrDefaultAsync();
+    }
+
+    public async Task<List<NoteModel>> ExistingNotes(System.Linq.Expressions.Expression<Func<NoteModel, bool>> predicate, bool folder = false, bool noteTags = false)
+    {
+        IQueryable<NoteModel> x = db.Notes;
+        if (folder) x = x.Include(x => x.Folder);
+        if (noteTags) x = x.Include(x => x.NoteTags!).ThenInclude(x => x.NoteTag);
+        return await x.Where(predicate).ToListAsync();
     }
 
     public async Task<NoteModel?> CreateNote(int userId, string folderPath, List<string> tags, string title, string content, string contentText, int priority)

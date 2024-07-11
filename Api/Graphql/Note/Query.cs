@@ -50,14 +50,17 @@ public class NoteQueries
                                               ? db.Notes.OrderBy(keySelector).ThenBy(x => x.Id)
                                              : db.Notes.OrderByDescending(keySelector).ThenByDescending(x => x.Id);
 
-        // basic filter
+
         var query = searchInput?.Query ?? "";
         // var filteredNotes = orderedNotes.Where(x => x.UserId == userContext.GetUserId()
         //                                        && EF.Functions.TrigramsAreSimilar(x.Title.ToLower() ?? "", query.ToLower())
         //                                        || EF.Functions.TrigramsAreSimilar((x.ContentText ?? "").ToLower(), query.ToLower())
         //                                  );
-        var filteredNotes = orderedNotes.Where(x => x.UserId == userContext.GetUserId()
-                                               && x.SearchVector!.Matches(query));
+        // basic filter
+        var filteredNotes = orderedNotes.Include(x => x.Folder)
+                                        .Include(x => x.NoteTags!).ThenInclude(x => x.NoteTag)
+                                        .Where(x => x.UserId == userContext.GetUserId()
+                                                    && x.SearchVector!.Matches(query));
 
 
 
@@ -118,7 +121,7 @@ public class NoteQueries
         }
 
         List<Note> notesList = [];
-        foreach (var x in notes[..Math.Min(pageSize, notes.Count)]) notesList.Add(await x.ToDto(services));
+        foreach (var x in notes[..Math.Min(pageSize, notes.Count)]) notesList.Add(x.ToDto());
 
         return new CursorSearch<List<Note>>(notesList, newCursor);
     }

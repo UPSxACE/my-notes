@@ -50,5 +50,6 @@ export default function useQueryNavigate(opts: Options = {}) {
     refetch,
     fetchMore: _fetchMore,
     endOfResults,
+    setOptions,
   };
 }

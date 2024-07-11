@@ -4,5 +4,7 @@ mutation createFolder($input: CreateFolderInput!) {
     path
     priority
     userId
+    lastNoteAdded
+    notesCount
   }
 }

@@ -24,7 +24,7 @@ export default function AppHeader() {
   return (
     <div
       className={clsx(
-        "font-sans overflow-hidden transition-all duration-500 delay-300 shrink-0",
+        "sticky top-0 font-sans overflow-hidden transition-all duration-500 delay-300 shrink-0 bg-white z-10",
         show ? "h-[60px] opacity-100" : "h-0 opacity-0"
       )}
     >

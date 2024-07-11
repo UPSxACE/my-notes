@@ -19,16 +19,30 @@ public class FolderQueries
     public async Task<List<Folder>> OwnFolders([Service] Services services, [Service] UserContext userContext)
     {
         var userId = userContext.GetUserId() ?? throw new GraphQLException("Invalid authentication");
-        var folders = await services.ExistingFolders(x => x.UserId == userId);
+        var folderModels = await services.ExistingFolders(x => x.UserId == userId);
 
-        return folders.Select(x => x.ToDto()).ToList();
+        List<Folder> folders = [];
+        foreach (var model in folderModels)
+        {
+            var notesList = await services.ExistingNotes(x => x.FolderId == model.Id);
+            folders.Add(model.ToDto(notesList.Count, notesList.LastOrDefault()?.CreatedAt ?? null));
+        }
+
+        return folders;
     }
 
     [Authorize(Policy = "user")]
-    public async Task<List<FolderModel>> FoldersInPath([Service] Services services, [Service] UserContext userContext, string path = "/")
+    public async Task<List<Folder>> FoldersInPath([Service] Services services, [Service] UserContext userContext, string path = "/")
     {
         var userId = userContext.GetUserId() ?? throw new GraphQLException("Invalid authentication");
-        var folders = await services.FoldersInPath(userId, path);
+        var folderModels = await services.FoldersInPath(userId, path);
+
+        List<Folder> folders = [];
+        foreach (var model in folderModels)
+        {
+            var notesList = await services.ExistingNotes(x => x.FolderId == model.Id);
+            folders.Add(model.ToDto(notesList.Count, notesList.LastOrDefault()?.CreatedAt ?? null));
+        }
 
         return folders;
     }
@@ -100,6 +114,7 @@ public class FolderQueries
         // basic filter
         var path = input?.Path ?? "/";
         var filteredNotes = orderedNotes.Include(x => x.Folder)
+                                        .Include(x => x.NoteTags!).ThenInclude(x => x.NoteTag)
                                         .Where(x => x.UserId == userContext.GetUserId() && x.Folder.Path == path);
 
         string? newCursor = null;
@@ -159,7 +174,7 @@ public class FolderQueries
         }
 
         List<Note> notesList = [];
-        foreach (var x in notes[..Math.Min(maxNotesToFetch, notes.Count)]) notesList.Add(await x.ToDto(services));
+        foreach (var x in notes[..Math.Min(maxNotesToFetch, notes.Count)]) notesList.Add(x.ToDto());
 
         var foldersLeftAfterFetch = foldersLeft - foldersToFetch;
         //if 0 notes, but still have folders left to fetch, create cursor with next page
@@ -168,7 +183,12 @@ public class FolderQueries
             newCursor = SearchCursorPagedEncoder.EncodeCursor<object?, string?>(null, null, currentPage + 1);
         }
 
-        List<Folder> folderList = currentPageFolders.Select(x => x.ToDto()).ToList();
+        List<Folder> folderList = [];
+        foreach (var model in currentPageFolders)
+        {
+            var ns = await services.ExistingNotes(x => x.FolderId == model.Id);
+            folderList.Add(model.ToDto(ns.Count, ns.LastOrDefault()?.CreatedAt ?? null));
+        }
 
         return new PathNodes
         (

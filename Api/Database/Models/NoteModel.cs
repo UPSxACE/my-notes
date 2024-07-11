@@ -7,23 +7,23 @@ namespace Database;
 public class NoteModel
 {
     // REVIEW: Analyse later if there isn't a better option (would DI work here somehow?)
-    public async Task<Graphql.Note> ToDto(Services services)
+    public Graphql.Note ToDto()
     {
-        var folder = await services.ExistingFolder(x => x.UserId == UserId && x.Id == FolderId);
-        var noteNoteTagModels = await services.ExistingNoteNoteTags(x => x.NoteId == Id);
+        var noteTagModels = NoteTags != null ? NoteTags.ToList() : [];
+        var noteTagNames = noteTagModels.Where(x => x?.NoteTag?.Name != null).Select(x => x.NoteTag.Name).ToList();
 
         return new Graphql.Note
         {
             Id = Id,
             UserId = UserId,
-            Folder = folder?.Path!,
+            Folder = Folder.Path,
             Title = Title,
             Content = Content,
             ContentText = ContentText,
-            Tags = noteNoteTagModels?.Select(x => x.NoteTag.Name).ToList()!,
+            Tags = noteTagNames,
             Priority = Priority,
             Views = Views,
-            CreatedAt = CreatedAt ?? DateTime.MinValue
+            CreatedAt = CreatedAt ?? DateTime.MinValue.ToUniversalTime()
         };
     }
 
@@ -47,4 +47,6 @@ public class NoteModel
     // Fks
     public virtual required UserModel User { get; set; }
     public virtual required FolderModel Folder { get; set; }
+    // Navigations
+    public virtual ICollection<NoteNoteTagModel>? NoteTags { get; set; }
 }

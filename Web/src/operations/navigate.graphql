@@ -18,6 +18,8 @@ query navigate($input: NavigateInput!) {
       path
       priority
       userId
+      lastNoteAdded
+      notesCount
     }
   }
 }
