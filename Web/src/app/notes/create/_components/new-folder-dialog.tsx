@@ -48,7 +48,7 @@ type Props = {
 
 export default function NewFolderDialog(props: Props) {
   const [createFolder] = useCreateFolderMutation({
-    refetchQueries: ["ownNoteTags", "ownFolders"],
+    refetchQueries: ["ownNoteTags", "ownFolders", "navigate"],
   });
   const [loading, setLoading] = useToggle(false);
 
