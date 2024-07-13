@@ -71,9 +71,10 @@ public class NoteQueries
             DecodedSearchCursor<string, string>? cursor;
             cursor = SearchCursorEncoder.DecodeCursor<string, string>(searchInput?.Cursor);
             if (cursor != null && direction == "asc")
-                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) >= 0 && x.Id.CompareTo(cursor.Cursor2) >= 0);
+                // NOTE this is equivalent to (x.Title, x.Id) >= (title, id) in postgres; this is not natively supported by EF core
+                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) > 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) <= 0 && x.Id.CompareTo(cursor.Cursor2) <= 0);
+                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) < 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0));
             notes = await filteredNotes.Take(pageSize + 1).ToListAsync();
             if (notes.Count == pageSize + 1)
                 newCursor = SearchCursorEncoder.EncodeCursor(notes[pageSize].Title, notes[pageSize].Id);
@@ -84,9 +85,9 @@ public class NoteQueries
             DecodedSearchCursor<int, string>? cursor;
             cursor = SearchCursorEncoder.DecodeCursor<int, string>(searchInput?.Cursor);
             if (cursor != null && direction == "asc")
-                filteredNotes = filteredNotes.Where(x => x.Priority >= cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0);
+                filteredNotes = filteredNotes.Where(x => x.Priority > cursor.Cursor1 || (x.Priority == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.Priority <= cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0);
+                filteredNotes = filteredNotes.Where(x => x.Priority < cursor.Cursor1 || (x.Priority == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0));
             notes = await filteredNotes.Take(pageSize + 1).ToListAsync();
             if (notes.Count == pageSize + 1)
                 newCursor = SearchCursorEncoder.EncodeCursor(notes[pageSize].Priority, notes[pageSize].Id);
@@ -97,9 +98,9 @@ public class NoteQueries
             DecodedSearchCursor<int, string>? cursor;
             cursor = SearchCursorEncoder.DecodeCursor<int, string>(searchInput?.Cursor);
             if (cursor != null && direction == "asc")
-                filteredNotes = filteredNotes.Where(x => x.Views >= cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0);
+                filteredNotes = filteredNotes.Where(x => x.Views > cursor.Cursor1 || (x.Views == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.Views <= cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0);
+                filteredNotes = filteredNotes.Where(x => x.Views < cursor.Cursor1 || (x.Views == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0));
             notes = await filteredNotes.Take(pageSize + 1).ToListAsync();
             if (notes.Count == pageSize + 1)
                 newCursor = SearchCursorEncoder.EncodeCursor(notes[pageSize].Views, notes[pageSize].Id);
@@ -109,12 +110,14 @@ public class NoteQueries
         {
             DecodedSearchCursor<long, string>? cursor;
             cursor = SearchCursorEncoder.DecodeCursor<long, string>(searchInput?.Cursor);
-            DateTime? cursorTime = cursor != null ? new DateTime(cursor.Cursor1).ToUniversalTime() : null;
+            DateTime? cursorTime = cursor != null ? new DateTime(cursor.Cursor1, DateTimeKind.Utc) : null;
 
             if (cursor != null && direction == "asc")
-                filteredNotes = filteredNotes.Where(x => x.CreatedAt >= cursorTime && x.Id.CompareTo(cursor.Cursor2) >= 0);
+                filteredNotes = filteredNotes.Where(x => (x.CreatedAt > cursorTime) ||
+                                                        (x.CreatedAt == cursorTime && x.Id.CompareTo(cursor.Cursor2) >= 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.CreatedAt <= cursorTime && x.Id.CompareTo(cursor.Cursor2) <= 0);
+                filteredNotes = filteredNotes.Where(x => (x.CreatedAt < cursorTime) ||
+                                                        (x.CreatedAt == cursorTime && x.Id.CompareTo(cursor.Cursor2) <= 0));
             notes = await filteredNotes.Take(pageSize + 1).ToListAsync();
             if (notes.Count == pageSize + 1)
                 newCursor = SearchCursorEncoder.EncodeCursor(notes[pageSize].CreatedAt?.Ticks ?? DateTime.MinValue.Ticks, notes[pageSize].Id);
