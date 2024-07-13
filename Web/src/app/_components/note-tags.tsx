@@ -2,13 +2,13 @@
 
 import BaseTag from "@/components/tags/base-tag";
 import GhostTextButton from "@/components/theme/app/ghost-text-button";
-import { Note } from "@/gql/graphql.schema";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
+} from "@/components/ui/dropdown-menu";
+import { Note } from "@/gql/graphql.schema";
 import { debounce } from "lodash";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -84,7 +84,10 @@ export default function NoteTags(props: Props) {
       </div>
       <div className="pl-[0.35rem]" ref={remainingRef}>
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger
+            asChild
+            className="!ring-0 !ring-offset-0 !outline-none"
+          >
             <GhostTextButton
               className={
                 "px-2 h-7 rounded-md text-gray-600 " +
@@ -96,11 +99,11 @@ export default function NoteTags(props: Props) {
               +{hiddenTagsCount}
             </GhostTextButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="min-w-40 bg-white border border-solid border-zinc-200 shadow-sm px-1 py-[0.35rem] rounded-md">
+          <DropdownMenuContent className="min-w-40 px-1 py-[0.35rem] rounded-md">
             {props.tags.slice(-hiddenTagsCount).map((hiddenTag, index) => (
               <DropdownMenuItem
                 key={index}
-                className="px-2 py-1 hover:bg-zinc-100 transition-all duration-100 rounded-md"
+                className="!ring-0 !ring-offset-0 !outline-none px-2 py-1 transition-all duration-100 rounded-md"
                 onClick={() => {
                   //FIXME
                 }}

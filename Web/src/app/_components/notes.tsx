@@ -30,13 +30,17 @@ export default function Notes() {
   // FIXME empty
   // FIXME components for each
   // FIXME drag & drop
-  // FIXME context menu
-  // FIXME onclick triggers
+  // FIXME context menu on note + logout
+  // FIXME hover effect
+  // FIXME onclick triggers + (inner join noteNoteTags + inner join noteTags + and filter OR)
   // FIXME triggers on navigate and go back
   // FIXME redirect on create
   // FIXME page transitions
-  // FIXME responsiveness
-  // FIXME workana + productivity + clean (plan)
+  // FIXME sidebar
+  // FIXME responsiveness + smaller sidebar for smaller screens
+  // FIXME style note view
+  // FIXME context menu (+ select)
+  // FIXME 15: workana + productivity + clean (plan)
 
   const enterFolder = (newPath: string) => () => updatePath(newPath);
 

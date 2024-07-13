@@ -14,9 +14,16 @@ export default function useQueryNavigate(opts: Options = {}) {
   const [options, setOptions] = useState({ pageSize: 16, ...opts });
   const { data, error, loading, refetch, fetchMore } = useNavigateQuery({
     variables: { input: options },
+    onCompleted: (a) => {
+      console.log("next fetch with:", a.navigate.cursor);
+    },
   });
 
+  // FIXME: test the behavior of cursors when changing the orderBy type to see if its truly working
+  // (probably yes because cursor is set on useEffect, and useEffect is triggered after the query?)
+  // (may still be a problem for cursors that should have been fetched already, or maybe not because of apollo cache?)
   useEffect(() => {
+    console.log(data?.navigate.cursor);
     // REVIEW: maybe this is good enough, lets hope so.
     setOptions((prev) => ({ ...prev, cursor: data?.navigate.cursor }));
   }, [data]);
@@ -50,6 +57,6 @@ export default function useQueryNavigate(opts: Options = {}) {
     refetch,
     fetchMore: _fetchMore,
     endOfResults,
-    setOptions,
+    setOptions, //TODO ? cache cursor
   };
 }

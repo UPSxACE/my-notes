@@ -20,7 +20,7 @@ const client = new ApolloClient({
       Query: {
         fields: {
           navigate: {
-            keyArgs: ["input", ["path"]], // REVIEW
+            keyArgs: ["input", ["path", "orderBy", "direction"]], // REVIEW
             merge: (
               existing: PathNodes = { folders: [], notes: [] },
               incoming: PathNodes,
