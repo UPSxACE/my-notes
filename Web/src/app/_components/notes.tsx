@@ -6,8 +6,10 @@ import { useInView } from "react-intersection-observer";
 import Folder from "./folder";
 import Note from "./note";
 import { NotesListContext } from "./notes-list-context";
+import { NotesSearchContext } from "./notes-search-context";
 
 export default function Notes() {
+  // Without search
   const { data, loading, fetchMore, error, endOfResults, updatePath } =
     useContext(NotesListContext);
   const { ref, inView, entry } = useInView({
@@ -15,12 +17,33 @@ export default function Notes() {
   });
   const folders = data?.folders || [];
   const notes = data?.notes || [];
+  // With search
+  const {
+    data: searchData,
+    loading: searchLoading,
+    fetchMore: searchFetchMore,
+    error: searchError,
+    endOfResults: searchEndOfResults,
+    search,
+  } = useContext(NotesSearchContext);
+  const filteredNotes = searchData?.results || [];
 
   useEffect(() => {
-    if (inView && !endOfResults) fetchMore();
-  }, [inView, endOfResults, fetchMore]);
+    // without search
+    if (search === "" && inView && !endOfResults) fetchMore();
+    if (search !== "" && inView && !searchEndOfResults) searchFetchMore();
+  }, [
+    inView,
+    endOfResults,
+    fetchMore,
+    search,
+    searchEndOfResults,
+    searchFetchMore,
+  ]);
 
-  if (loading || error) {
+  const notReady = search === "" && (loading || error);
+  const searchNotReady = search !== "" && (loading || error);
+  if (notReady || searchNotReady) {
     return <section>Loading</section>;
   }
 
@@ -40,26 +63,45 @@ export default function Notes() {
   // FIXME responsiveness + smaller sidebar for smaller screens
   // FIXME style note view
   // FIXME context menu (+ select)
+  // FIXME return style instead of class in transition hooks
   // FIXME 15: workana + productivity + clean (plan)
 
   const enterFolder = (newPath: string) => () => updatePath(newPath);
 
   return (
     <section className="grid grid-cols-1 xl:grid-cols-4 gap-4 mt-2">
-      {folders.map((f, index) => {
-        return (
-          <Folder key={index} folder={f} enterFolder={enterFolder(f.path)} />
-        );
-      })}
-      {notes.map((n, index) => {
-        return <Note key={index} note={n} />;
-      })}
-      {!loading && !error && !endOfResults && (
+      {search === "" &&
+        folders.map((f, index) => {
+          return (
+            <Folder key={index} folder={f} enterFolder={enterFolder(f.path)} />
+          );
+        })}
+      {search === "" &&
+        notes.map((n, index) => {
+          return <Note key={index} note={n} />;
+        })}
+      {search !== "" &&
+        filteredNotes.map((n, index) => {
+          return <Note key={index} note={n} />;
+        })}
+      {search === "" && !loading && !error && !endOfResults && (
         <div ref={ref} className="col-span-1 xl:col-span-4 flex justify-center">
           {/* <LoadingSpinner className="h-10 w-10" /> */}
           <SpinnerSkCircle className="!mx-0 !my-2" />
         </div>
       )}
+      {search !== "" &&
+        !searchLoading &&
+        !searchError &&
+        !searchEndOfResults && (
+          <div
+            ref={ref}
+            className="col-span-1 xl:col-span-4 flex justify-center"
+          >
+            {/* <LoadingSpinner className="h-10 w-10" /> */}
+            <SpinnerSkCircle className="!mx-0 !my-2" />
+          </div>
+        )}
       {/* <BaseButton onClick={fetchMore}>Load more</BaseButton> */}
     </section>
   );

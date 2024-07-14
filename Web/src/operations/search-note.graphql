@@ -1,0 +1,17 @@
+query searchNote($input: SearchInput!) {
+  searchNote(searchInput: $input) {
+    cursor
+    results {
+      content
+      contentText
+      createdAt
+      folder
+      id
+      priority
+      tags
+      title
+      userId
+      views
+    }
+  }
+}

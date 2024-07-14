@@ -1,5 +1,5 @@
 "use client";
-import { PathNodes } from "@/gql/graphql";
+import { CursorSearchOfListOfNote } from "@/gql/graphql.schema";
 import { ApolloError } from "@apollo/client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
@@ -10,40 +10,41 @@ import {
   useRef,
 } from "react";
 import { OrderBy, enumToOptions } from "./order-by";
-import useQueryNavigate from "./use-query-navigate";
+import useQuerySearchNote from "./use-query-search-note";
 
 type Context = {
-  data: PathNodes;
+  data: CursorSearchOfListOfNote;
   fetchMore: () => void;
   loading: boolean;
   error?: ApolloError;
   endOfResults: boolean;
-  path?: string;
-  updatePath: (newPath: string) => void;
-  orderBy?: OrderBy;
-  updateOrderBy: (newOrder: OrderBy) => void;
+  search: string;
+  updateSearch: (newSearch: string) => void;
 };
 
 const defaultValue: Context = {
-  data: { cursor: null, folders: [], notes: [] },
+  data: { cursor: null, results: [] },
   fetchMore: () => {},
   loading: true,
   endOfResults: false,
-  updatePath: (newPath: string) => {},
-  updateOrderBy: (newOrder: OrderBy) => {},
+  search: "",
+  updateSearch: (newSearch: string) => {},
 };
 
-export const NotesListContext = createContext<Context>(defaultValue);
+export const NotesSearchContext = createContext<Context>(defaultValue);
 
-export default function NotesListContextProvider(props: {
+export default function NotesSearchContextProvider(props: {
   children: Readonly<ReactNode>;
 }) {
   const searchParams = useSearchParams();
-  const path = searchParams.get("path") || undefined;
+  const search = searchParams.get("search") || "";
   const orderBy = (searchParams.get("order") as OrderBy) || OrderBy.LatestFirst;
-  //FIXME search searchParam + debounce on low level component + function to update path goes down
 
-  const orderByOptionsInitial = useRef({ path, ...enumToOptions(orderBy) });
+  const orderByOptionsInitial = useRef({
+    query: search,
+    ...enumToOptions(orderBy),
+  });
+  //   const orderByOptionsInitial = useRef(enumToOptions(orderBy));
   const {
     data = defaultValue.data,
     error,
@@ -51,7 +52,7 @@ export default function NotesListContextProvider(props: {
     fetchMore,
     endOfResults,
     setOptions,
-  } = useQueryNavigate(orderByOptionsInitial.current);
+  } = useQuerySearchNote(orderByOptionsInitial.current);
 
   const router = useRouter();
   const pathname = usePathname();
@@ -68,39 +69,33 @@ export default function NotesListContextProvider(props: {
     [searchParams]
   );
 
-  function updatePath(newPath: string) {
-    router.push(`${pathname}?${createQueryString("path", newPath)}`);
-  }
-
-  function updateOrderBy(newOrder: OrderBy) {
-    router.push(`${pathname}?${createQueryString("order", newOrder)}`);
+  function updateSearch(newSearch: string) {
+    router.push(`${pathname}?${createQueryString("search", newSearch)}`);
   }
 
   useEffect(() => {
     const orderByOptions = enumToOptions(orderBy);
     setOptions((prev) => ({
       ...prev,
-      path,
+      query: search,
       ...orderByOptions,
-      cursor: undefined, // cursor should be resetted when path or orderBy changes
+      cursor: undefined, // cursor should be resetted when search or orderBy changes
     }));
-  }, [path, orderBy, setOptions]);
+  }, [orderBy, search, setOptions]);
 
   return (
-    <NotesListContext.Provider
+    <NotesSearchContext.Provider
       value={{
         data,
         fetchMore,
         loading,
         error,
         endOfResults,
-        path,
-        updatePath,
-        orderBy,
-        updateOrderBy,
+        search,
+        updateSearch,
       }}
     >
       {props.children}
-    </NotesListContext.Provider>
+    </NotesSearchContext.Provider>
   );
 }

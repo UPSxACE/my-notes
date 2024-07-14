@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useContext, useState } from "react";
-import { NotesListContext, OrderBy } from "./notes-list-context";
+import { NotesListContext } from "./notes-list-context";
 
 import GhostTextButton from "@/components/theme/app/ghost-text-button";
 import {
@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/select";
 import { ListFilter } from "lucide-react";
 import { Inter } from "next/font/google";
+import { NotesSearchContext } from "./notes-search-context";
+import { OrderBy } from "./order-by";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +28,7 @@ const inter = Inter({
 });
 
 export default function Filters() {
+  // without search
   const { path, updatePath, orderBy, updateOrderBy } =
     useContext(NotesListContext);
   const splitPath = path && path.length >= 2 ? path.split("/") : [""];
@@ -34,44 +37,65 @@ export default function Filters() {
 
   const changePath = (newPath: string) => () => updatePath(newPath);
 
-  //FIXME rightside filters SORT + search full text
+  // with search
+  const { search } = useContext(NotesSearchContext);
+
   //FIXME add folder count to file count
 
   return (
     <section
       className={"mt-2 flex items-center text-lg gap-1 " + inter.className}
     >
-      <button onClick={path !== "/" && !!path ? changePath("/") : undefined}>
-        Notes
-      </button>
-      {breadcrumbs.map((x, index) => {
-        return (
-          <Fragment key={index}>
-            <span
-              className={index === breadcrumbs.length - 1 ? "font-bold" : ""}
-            >
-              /
-            </span>
-            <button
-              className={index === breadcrumbs.length - 1 ? "font-bold" : ""}
-              onClick={changePath(
-                "/" + breadcrumbs.slice(0, index + 1).join("/")
-              )}
-            >
-              {x}
-            </button>
-          </Fragment>
-        );
-      })}
+      {search === "" && (
+        <>
+          <button
+            onClick={path !== "/" && !!path ? changePath("/") : undefined}
+          >
+            Notes
+          </button>
+          {breadcrumbs.map((x, index) => {
+            return (
+              <Fragment key={index}>
+                <span
+                  className={
+                    index === breadcrumbs.length - 1 ? "font-bold" : ""
+                  }
+                >
+                  /
+                </span>
+                <button
+                  className={
+                    index === breadcrumbs.length - 1 ? "font-bold" : ""
+                  }
+                  onClick={changePath(
+                    "/" + breadcrumbs.slice(0, index + 1).join("/")
+                  )}
+                >
+                  {x}
+                </button>
+              </Fragment>
+            );
+          })}
+        </>
+      )}
+      {search !== "" && (
+        <span>
+          Results for: <strong>{search}</strong>
+        </span>
+      )}
 
       <Popover open={open} onOpenChange={(open) => setOpen(open)}>
         <PopoverTrigger
           asChild
           className="!ring-0 !ring-offset-0 !outline-none"
         >
-          <GhostTextButton className="ml-auto font-medium hover:bg-zinc-200 rounded-sm h-9 px-2">
+          <GhostTextButton className="ml-auto font-medium hover:bg-zinc-200 rounded-sm h-9 px-2 text-lg">
             Filters{" "}
-            <ListFilter size={"1.35rem"} className="ml-1" strokeWidth={1.5} />
+            <ListFilter
+              size={"1.5rem"}
+              className="ml-1 !mb-[0.075rem]"
+              strokeWidth={1.5}
+            />
           </GhostTextButton>
         </PopoverTrigger>
         <PopoverContent
