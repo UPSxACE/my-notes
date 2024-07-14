@@ -25,7 +25,9 @@ public class FolderQueries
         foreach (var model in folderModels)
         {
             var notesList = await services.ExistingNotes(x => x.FolderId == model.Id);
-            folders.Add(model.ToDto(notesList.Count, notesList.LastOrDefault()?.CreatedAt ?? null));
+            var foldersInside = await services.FoldersInPath(userId, model.Path);
+            var nodesCount = notesList.Count + foldersInside.Count;
+            folders.Add(model.ToDto(nodesCount, notesList.LastOrDefault()?.CreatedAt ?? null));
         }
 
         return folders;
@@ -41,7 +43,9 @@ public class FolderQueries
         foreach (var model in folderModels)
         {
             var notesList = await services.ExistingNotes(x => x.FolderId == model.Id);
-            folders.Add(model.ToDto(notesList.Count, notesList.LastOrDefault()?.CreatedAt ?? null));
+            var foldersInside = await services.FoldersInPath(userId, model.Path);
+            var nodesCount = notesList.Count + foldersInside.Count;
+            folders.Add(model.ToDto(nodesCount, notesList.LastOrDefault()?.CreatedAt ?? null));
         }
 
         return folders;
@@ -190,7 +194,9 @@ public class FolderQueries
         foreach (var model in currentPageFolders)
         {
             var ns = await services.ExistingNotes(x => x.FolderId == model.Id);
-            folderList.Add(model.ToDto(ns.Count, ns.LastOrDefault()?.CreatedAt ?? null));
+            var foldersInside = await services.FoldersInPath(userId, model.Path);
+            var nodesCount = ns.Count + foldersInside.Count;
+            folderList.Add(model.ToDto(nodesCount, ns.LastOrDefault()?.CreatedAt ?? null));
         }
 
         return new PathNodes

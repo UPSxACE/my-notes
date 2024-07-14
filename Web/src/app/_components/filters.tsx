@@ -40,8 +40,6 @@ export default function Filters() {
   // with search
   const { search } = useContext(NotesSearchContext);
 
-  //FIXME add folder count to file count
-
   return (
     <section
       className={"mt-2 flex items-center text-lg gap-1 " + inter.className}

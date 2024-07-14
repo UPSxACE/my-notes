@@ -117,7 +117,10 @@ public class Services(Db db)
 
     public async Task<List<FolderModel>> FoldersInPath(int userId, string path)
     {
-        // TODO: Reddis cache this function in the future?
+        // TODO: Reddis cache this function in the future? 
+        // (REALLY NEEDED, because of how fetching all folders means fetching all notes inside
+        // and then fetching all folders inside that one too)
+        // FIXME: high priority implementation
         var allFoldersInside = await ExistingFolders(x => x.UserId == userId && x.Path.StartsWith(path));
 
         return allFoldersInside.Where(x =>
