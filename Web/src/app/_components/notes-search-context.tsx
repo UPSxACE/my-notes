@@ -60,10 +60,15 @@ export default function NotesSearchContextProvider(props: {
   // Get a new searchParams string by merging the current
   // searchParams with a provided key/value pair
   const createQueryString = useCallback(
-    (name: string, value: string) => {
+    (name: string, value: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
-      params.set(name, value);
 
+      if (value === null || value === "") {
+        params.delete(name);
+        return params.toString();
+      }
+
+      params.set(name, value);
       return params.toString();
     },
     [searchParams]

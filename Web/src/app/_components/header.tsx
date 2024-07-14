@@ -14,7 +14,7 @@ export default function Header() {
   const { search, updateSearch } = useContext(NotesSearchContext);
 
   const changeSearch = debounce((e: ChangeEvent<HTMLInputElement>) => {
-    updateSearch(e.target.value || "");
+    updateSearch(e.target.value);
   }, 800);
 
   return (

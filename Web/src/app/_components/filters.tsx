@@ -48,9 +48,7 @@ export default function Filters() {
     >
       {search === "" && (
         <>
-          <button
-            onClick={path !== "/" && !!path ? changePath("/") : undefined}
-          >
+          <button onClick={path !== "/" && !!path ? changePath("") : undefined}>
             Notes
           </button>
           {breadcrumbs.map((x, index) => {
