@@ -39,7 +39,7 @@ export default function FolderSelector(props: Props) {
 
   const { data, loading, error } = useQueryFolders();
 
-  if (loading || error) {
+  if ((mode === Mode.Default && loading) || error) {
     return (
       <DialogContent
         key="0" // force rerender without transition
@@ -82,6 +82,7 @@ export default function FolderSelector(props: Props) {
               visibleClass={visibleClass}
               folderState={props.state}
               localSelectionState={[localSelection, setLocalSelection]}
+              selectorLoading={loading}
               // refetchFolders={refetch}
             />
           )}

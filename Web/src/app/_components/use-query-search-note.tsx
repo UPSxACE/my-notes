@@ -5,13 +5,14 @@ import {
 } from "@/gql/graphql.schema";
 import useDoOnce from "@/hooks/use-do-once";
 import { notifyFatal } from "@/utils/toaster-notifications";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 type Options = {
   cursor?: string | null;
   direction?: "asc" | "desc";
   orderBy?: "createdat" | "priority" | "views" | "title";
   query: string;
+  pageSize?: number;
 };
 
 export default function useQuerySearchNote(opts: Options = { query: "" }) {
@@ -45,16 +46,33 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
 
   const endOfResults = !loading && !result?.cursor;
 
-  function _fetchMore() {
+  const memoizedOptions: Options = useMemo(
+    () => ({
+      cursor: options.cursor,
+      direction: options.direction,
+      orderBy: options.orderBy,
+      pageSize: options.pageSize,
+      query: options.query,
+    }),
+    [
+      options.cursor,
+      options.direction,
+      options.orderBy,
+      options.pageSize,
+      options.query,
+    ]
+  );
+
+  const _fetchMore = useCallback(() => {
     if (endOfResults) return;
-    if (options.query === "") return;
+    if (memoizedOptions.query === "") return;
 
     if (!called) {
       // NOTE: despite this being here, this will probably never happen
       console.log("!called situation happened");
       fetch({
         variables: {
-          input: options,
+          input: memoizedOptions,
         },
       });
     }
@@ -62,11 +80,11 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
     if (called) {
       fetchMore({
         variables: {
-          input: options,
+          input: memoizedOptions,
         },
       });
     }
-  }
+  }, [endOfResults, called, memoizedOptions, fetch, fetchMore]);
 
   return {
     data: result,

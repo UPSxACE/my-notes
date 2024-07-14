@@ -20,7 +20,7 @@ import getGqlErrorMessage from "@/utils/get-gql-error";
 import { ReactState } from "@/utils/react-state-type";
 import { notifyError } from "@/utils/toaster-notifications";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Flipped } from "react-flip-toolkit";
 import { useForm } from "react-hook-form";
 import { BiArrowBack } from "react-icons/bi";
@@ -44,22 +44,39 @@ type Props = {
   changeToDefault: () => void;
   folderState: ReactState<string>;
   localSelectionState: ReactState<string>;
+  selectorLoading: boolean;
 };
 
 export default function NewFolderDialog(props: Props) {
-  const [createFolder] = useCreateFolderMutation({
-    refetchQueries: ["ownNoteTags", "ownFolders", "navigate"],
-  });
-  const [loading, setLoading] = useToggle(false);
-
   const {
     visible,
     visibleClass,
     changeToDefault,
     folderState,
     localSelectionState,
+    selectorLoading,
     ...rest
   } = props;
+
+  const [loading, setLoading] = useToggle(false);
+  // state to wait for cache eviction
+  const [readyToLeave, setReadyToLeave] = useState(false);
+  useEffect(() => {
+    if (readyToLeave && !selectorLoading) {
+      setReadyToLeave(false);
+      setLoading(false);
+      changeToDefault();
+    }
+  }, [readyToLeave, setLoading, changeToDefault, selectorLoading]);
+
+  const [createFolder] = useCreateFolderMutation({
+    // refetchQueries: ["ownNoteTags", "ownFolders", "navigate"],
+    update(cache) {
+      cache.evict({ fieldName: "ownNoteTags" });
+      cache.evict({ fieldName: "ownFolders" });
+      cache.evict({ fieldName: "navigate" });
+    },
+  });
 
   const [_, setFolder] = folderState;
   const [localSelection, setLocalSelection] = localSelectionState;
@@ -97,8 +114,7 @@ export default function NewFolderDialog(props: Props) {
           setFolder(newFolderPath);
           setLocalSelection(newFolderPath);
         }
-        setLoading(false);
-        changeToDefault();
+        setReadyToLeave(true);
         // });
       })
       .catch((e) => {

@@ -20,6 +20,7 @@ type Context = {
   endOfResults: boolean;
   search: string;
   updateSearch: (newSearch: string) => void;
+  resetCursor: () => void;
 };
 
 const defaultValue: Context = {
@@ -29,6 +30,7 @@ const defaultValue: Context = {
   endOfResults: false,
   search: "",
   updateSearch: (newSearch: string) => {},
+  resetCursor: () => {},
 };
 
 export const NotesSearchContext = createContext<Context>(defaultValue);
@@ -88,6 +90,10 @@ export default function NotesSearchContextProvider(props: {
     }));
   }, [orderBy, search, setOptions]);
 
+  function resetCursor() {
+    setOptions((prev) => ({ ...prev, cursor: undefined }));
+  }
+
   return (
     <NotesSearchContext.Provider
       value={{
@@ -98,6 +104,7 @@ export default function NotesSearchContextProvider(props: {
         endOfResults,
         search,
         updateSearch,
+        resetCursor,
       }}
     >
       {props.children}

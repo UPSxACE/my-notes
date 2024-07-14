@@ -30,8 +30,16 @@ export default function Notes() {
 
   useEffect(() => {
     // without search
-    if (search === "" && inView && !endOfResults) fetchMore();
-    if (search !== "" && inView && !searchEndOfResults) searchFetchMore();
+    if (search === "" && !loading && !searchLoading && inView && !endOfResults)
+      fetchMore();
+    if (
+      search !== "" &&
+      !loading &&
+      !searchLoading &&
+      inView &&
+      !searchEndOfResults
+    )
+      searchFetchMore();
   }, [
     inView,
     endOfResults,
@@ -39,6 +47,8 @@ export default function Notes() {
     search,
     searchEndOfResults,
     searchFetchMore,
+    loading,
+    searchLoading,
   ]);
 
   const notReady = search === "" && (loading || error);
@@ -47,7 +57,6 @@ export default function Notes() {
     return <section>Loading</section>;
   }
 
-  // FIXME searchbar filters
   // FIXME new folder
   // FIXME loading
   // FIXME empty

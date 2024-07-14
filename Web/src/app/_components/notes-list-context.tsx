@@ -22,6 +22,7 @@ type Context = {
   updatePath: (newPath: string) => void;
   orderBy?: OrderBy;
   updateOrderBy: (newOrder: OrderBy) => void;
+  resetCursor: () => void;
 };
 
 const defaultValue: Context = {
@@ -31,6 +32,7 @@ const defaultValue: Context = {
   endOfResults: false,
   updatePath: (newPath: string) => {},
   updateOrderBy: (newOrder: OrderBy) => {},
+  resetCursor: () => {},
 };
 
 export const NotesListContext = createContext<Context>(defaultValue);
@@ -41,7 +43,6 @@ export default function NotesListContextProvider(props: {
   const searchParams = useSearchParams();
   const path = searchParams.get("path") || undefined;
   const orderBy = (searchParams.get("order") as OrderBy) || OrderBy.LatestFirst;
-  //FIXME search searchParam + debounce on low level component + function to update path goes down
 
   const orderByOptionsInitial = useRef({ path, ...enumToOptions(orderBy) });
   const {
@@ -91,6 +92,10 @@ export default function NotesListContextProvider(props: {
     }));
   }, [path, orderBy, setOptions]);
 
+  function resetCursor() {
+    setOptions((prev) => ({ ...prev, cursor: undefined }));
+  }
+
   return (
     <NotesListContext.Provider
       value={{
@@ -103,6 +108,7 @@ export default function NotesListContextProvider(props: {
         updatePath,
         orderBy,
         updateOrderBy,
+        resetCursor,
       }}
     >
       {props.children}

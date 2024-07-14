@@ -37,7 +37,12 @@ export default function CreateNotePage() {
   const { editor, json, text } = useBlockEditor({});
   // gql
   const [createNote] = useCreateNoteMutation({
-    refetchQueries: ["ownNoteTags", "navigate"],
+    // refetchQueries: ["ownNoteTags", "navigate"],
+    update(cache) {
+      cache.evict({ fieldName: "ownNoteTags" });
+      cache.evict({ fieldName: "ownFolders" });
+      cache.evict({ fieldName: "navigate" });
+    },
   });
   // state
   const [valid, setValid] = useState(false);

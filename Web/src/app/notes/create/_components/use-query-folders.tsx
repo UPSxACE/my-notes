@@ -5,7 +5,10 @@ import useDoOnce from "@/hooks/use-do-once";
 import { notifyFatal } from "@/utils/toaster-notifications";
 
 export default function useQueryFolders() {
-  const { data, error, loading, refetch } = useOwnFoldersQuery();
+  //, networkStatus
+  const { data, error, loading, refetch } = useOwnFoldersQuery({
+    notifyOnNetworkStatusChange: true,
+  });
   const allFolders = data?.ownFolders;
 
   const notifyErrorOnce = useDoOnce(() => notifyFatal());
@@ -14,5 +17,11 @@ export default function useQueryFolders() {
     notifyErrorOnce();
   }
 
-  return { data: allFolders, error, loading, refetch };
+  return {
+    data: allFolders,
+    error,
+    loading,
+    refetch,
+    //refetching: networkStatus === 4,
+  };
 }

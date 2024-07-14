@@ -1,6 +1,7 @@
 import BaseButton, {
   BaseButtonProps,
 } from "@/components/base-components/base-button";
+import { forwardRef } from "react";
 import { twMerge } from "tailwind-merge";
 
 type Props = BaseButtonProps & {
@@ -8,7 +9,7 @@ type Props = BaseButtonProps & {
   square?: boolean;
 };
 
-export default function CtaButton(props: Props) {
+const CtaButton = forwardRef<HTMLButtonElement, Props>((props, ref) => {
   const { green, square, ...restProps } = props;
   return (
     <BaseButton
@@ -19,6 +20,10 @@ export default function CtaButton(props: Props) {
         props.square && "rounded-none",
         props.className
       )}
+      ref={ref}
     />
   );
-}
+});
+
+CtaButton.displayName = "CtaButton";
+export default CtaButton;
