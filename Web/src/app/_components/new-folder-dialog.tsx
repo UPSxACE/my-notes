@@ -15,9 +15,14 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { useCreateFolderMutation } from "@/gql/graphql.schema";
+import {
+  NavigateDocument,
+  NavigateQuery,
+  useCreateFolderMutation,
+} from "@/gql/graphql.schema";
 import useToggle from "@/hooks/use-toggle";
 import getGqlErrorMessage from "@/utils/get-gql-error";
+import { compareUidsV7, sortFoldersByUidAsc } from "@/utils/sorting-helpers";
 import { notifyError } from "@/utils/toaster-notifications";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useContext } from "react";
@@ -27,7 +32,9 @@ import { NotesListContext } from "./notes-list-context";
 import { NotesSearchContext } from "./notes-search-context";
 
 type Props = {
-  path: string;
+  path?: string;
+  orderBy?: string;
+  direction?: string;
   afterSave: () => void;
 };
 
@@ -43,20 +50,89 @@ const formSchema = z.object({
 });
 
 export default function NewFolderDialog(props: Props) {
-  const { path, afterSave } = props;
+  const { path, orderBy, direction, afterSave } = props;
   const { resetCursor } = useContext(NotesListContext);
-  const { resetCursor: resetSearchCursor } = useContext(NotesSearchContext);
+  const { search, resetCursor: resetSearchCursor } =
+    useContext(NotesSearchContext);
 
-  const [createFolder] = useCreateFolderMutation({
-    //refetchQueries: ["ownNoteTags", "ownFolders", "navigate"],
-    update(cache) {
-      resetCursor();
+  const [createFolder, { client }] = useCreateFolderMutation({
+    update(cache, result, { context, variables }) {
+      // resetCursor();
+      // resetSearchCursor();
+      // cache.evict({ fieldName: "navigate" });
+
+      cache.evict({
+        fieldName: "ownFolders",
+      });
+
       resetSearchCursor();
-      // NOTE: one thing cache eviction doesn't do is resetting the cursors!
-      // So we have to manually do it whenever the query is in a component that is mounted right now!
-      cache.evict({ fieldName: "ownNoteTags" });
-      cache.evict({ fieldName: "ownFolders" });
-      cache.evict({ fieldName: "navigate" });
+      if (search !== "") {
+        cache.evict({
+          fieldName: "navigate",
+        });
+        cache.evict({
+          fieldName: "search-note",
+        });
+
+        // NOTE: one thing cache eviction doesn't do is resetting the cursors!
+        // So we have to manually do it whenever the query is in a component that is mounted right now, and not being used!
+        // (If it is being used, then update the cache instead; this specific case is an exception, because it doesn't matter
+        // if we just force a refresh by both evicting the cache and resetting the cursor in a search after a creation of something)
+        resetCursor();
+        return;
+      }
+
+      const createdFolder = result.data?.createFolder;
+
+      const currentCache = cache.readQuery<NavigateQuery>({
+        query: NavigateDocument,
+        variables: { input: { orderBy, path, direction } },
+      });
+
+      // Array must be reconstructed, because it is a readonly reference
+      let updatedFolders = Array.from(currentCache?.navigate.folders || []);
+      const updatedNotes = Array.from(currentCache?.navigate.notes || []);
+
+      if (!createdFolder) throw new Error("An unexpected error has occurred.");
+
+      const lastFolder = updatedFolders[updatedFolders.length - 1];
+      const comparisonWithLast = lastFolder
+        ? compareUidsV7(createdFolder.id, lastFolder.id)
+        : 0;
+      if (comparisonWithLast <= 0 || updatedNotes.length > 0) {
+        // if there is no folders (0) or if there is folders, but it would be placed in the middle of them (-1),~
+        // OR if notes already started being fetched...
+        // then push it to the cache, and then re-sort them
+        // FIXME there is an edge case that most likely needs to be fixed: when exactly 16 folders exist, 
+        // and a 17th just got added, and NO NOTES were fetched yet.
+        updatedFolders.push(createdFolder);
+        updatedFolders = sortFoldersByUidAsc(updatedFolders);
+      }
+
+      cache.evict({
+        fieldName: "navigate",
+        broadcast: false,
+      });
+
+      const currentData = {
+        navigate: {
+          cursor: currentCache?.navigate.cursor,
+          folders: updatedFolders,
+          notes: updatedNotes,
+        },
+      };
+
+      cache.writeQuery({
+        query: NavigateDocument,
+        variables: {
+          input: {
+            orderBy,
+            path,
+            direction,
+          },
+        },
+        data: currentData,
+      });
     },
   });
   const [loading, setLoading] = useToggle(false);
@@ -70,7 +146,7 @@ export default function NewFolderDialog(props: Props) {
   });
 
   const saveFolder = (values: z.infer<typeof formSchema>) => {
-    let fullPath = path;
+    let fullPath = path || "/";
     if (fullPath !== "/") fullPath += "/";
     fullPath += values.path;
 
@@ -78,7 +154,7 @@ export default function NewFolderDialog(props: Props) {
     createFolder({
       variables: {
         input: {
-          path: fullPath,
+          path: fullPath || "/",
           priority: values.priority,
         },
       },
@@ -106,7 +182,7 @@ export default function NewFolderDialog(props: Props) {
           <DialogTitle>Create Folder</DialogTitle>
           <DialogDescription>
             Create a new folder to save notes on a different path. The folder
-            will be located in <strong>{path}</strong> .
+            will be located in <strong>{path || "/"}</strong> .
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>

@@ -57,7 +57,6 @@ export default function Notes() {
     return <section>Loading</section>;
   }
 
-  // FIXME new folder
   // FIXME loading
   // FIXME empty
   // FIXME components for each
@@ -74,6 +73,8 @@ export default function Notes() {
   // FIXME context menu (+ select)
   // FIXME return style instead of class in transition hooks
   // FIXME 15: workana + productivity + clean (plan)
+  // FIXME order folder names by name
+  // FIXME notifications on register/etc. (review fixmes)
 
   const enterFolder = (newPath: string) => () => updatePath(newPath);
 

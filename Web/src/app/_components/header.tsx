@@ -19,6 +19,7 @@ import { debounce } from "lodash";
 import NewFolderDialog from "./new-folder-dialog";
 import { NotesListContext } from "./notes-list-context";
 import { NotesSearchContext } from "./notes-search-context";
+import { enumToOptions } from "./order-by";
 
 export default function Header() {
   const { search, updateSearch } = useContext(NotesSearchContext);
@@ -30,7 +31,8 @@ export default function Header() {
   const [newFolderOpen, toggleNewFolderOpen] = useToggle(false);
   const updateNewFolder = (value: boolean) => () => toggleNewFolderOpen(value);
 
-  const { path = "/" } = useContext(NotesListContext);
+  const { path, orderBy: _orderBy } = useContext(NotesListContext);
+  const { orderBy, direction } = enumToOptions(_orderBy);
 
   return (
     <section className="flex gap-2">
@@ -63,7 +65,12 @@ export default function Header() {
           </DropdownMenuContent>
         </DropdownMenu>
         <Dialog open={newFolderOpen} onOpenChange={toggleNewFolderOpen}>
-          <NewFolderDialog path={path} afterSave={updateNewFolder(false)} />
+          <NewFolderDialog
+            path={path}
+            orderBy={orderBy}
+            direction={direction}
+            afterSave={updateNewFolder(false)}
+          />
         </Dialog>
       </div>
       <div className="flex-1 flex bg-white rounded-md overflow-hidden items-center pl-3 pr-2 border-zinc-200 border border-solid h-10">

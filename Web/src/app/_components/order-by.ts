@@ -14,7 +14,7 @@ type OrderByOptions = {
   orderBy?: "createdat" | "priority" | "views" | "title";
 };
 
-export function enumToOptions(orderBy: OrderBy): OrderByOptions {
+export function enumToOptions(orderBy?: OrderBy): OrderByOptions {
   switch (orderBy) {
     case OrderBy.TitleAZ:
       return {
