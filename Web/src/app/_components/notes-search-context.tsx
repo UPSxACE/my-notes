@@ -53,6 +53,7 @@ export default function NotesSearchContextProvider(props: {
     loading,
     fetchMore,
     endOfResults,
+    options,
     setOptions,
   } = useQuerySearchNote(orderByOptionsInitial.current);
 
@@ -82,13 +83,18 @@ export default function NotesSearchContextProvider(props: {
 
   useEffect(() => {
     const orderByOptions = enumToOptions(orderBy);
-    setOptions((prev) => ({
-      ...prev,
-      query: search,
-      ...orderByOptions,
-      cursor: undefined, // cursor should be resetted when search or orderBy changes
-    }));
-  }, [orderBy, search, setOptions]);
+    if (
+      orderByOptions.direction !== options.direction ||
+      orderByOptions.orderBy !== options.orderBy || search !== options.query
+    ) {
+      setOptions((prev) => ({
+        ...prev,
+        query: search,
+        ...orderByOptions,
+        cursor: undefined, // cursor should be resetted when search or orderBy changes
+      }));
+    }
+  }, [orderBy, search, setOptions, options]);
 
   function resetCursor() {
     setOptions((prev) => ({ ...prev, cursor: undefined }));

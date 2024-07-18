@@ -51,6 +51,7 @@ export default function NotesListContextProvider(props: {
     loading,
     fetchMore,
     endOfResults,
+    options,
     setOptions,
   } = useQueryNavigate(orderByOptionsInitial.current);
 
@@ -84,13 +85,18 @@ export default function NotesListContextProvider(props: {
 
   useEffect(() => {
     const orderByOptions = enumToOptions(orderBy);
-    setOptions((prev) => ({
-      ...prev,
-      path,
-      ...orderByOptions,
-      cursor: undefined, // cursor should be resetted when path or orderBy changes
-    }));
-  }, [path, orderBy, setOptions]);
+    if (
+      orderByOptions.direction !== options.direction ||
+      orderByOptions.orderBy !== options.orderBy ||
+      path !== options.path
+    )
+      setOptions((prev) => ({
+        ...prev,
+        path,
+        ...orderByOptions,
+        cursor: undefined, // cursor should be resetted when path or orderBy changes
+      }));
+  }, [path, orderBy, setOptions, options]);
 
   function resetCursor() {
     setOptions((prev) => ({ ...prev, cursor: undefined }));

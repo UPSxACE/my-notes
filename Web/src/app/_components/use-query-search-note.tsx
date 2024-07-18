@@ -27,11 +27,12 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
   }, [options, called, fetch]);
 
   useEffect(() => {
-    if (called) {
+    //  && options.cursor !== data?.searchNote.cursor
+    if (called && options.cursor !== data?.searchNote.cursor) {
       // REVIEW: maybe this is good enough, lets hope so.
       setOptions((prev) => ({ ...prev, cursor: data?.searchNote.cursor }));
     }
-  }, [data, called]);
+  }, [options, data, called]);
 
   // if query is empty, results should be empty array
   const result: CursorSearchOfListOfNote =
@@ -93,6 +94,7 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
     refetch,
     fetchMore: _fetchMore,
     endOfResults,
+    options,
     setOptions, //TODO ? cache cursor
   };
 }
