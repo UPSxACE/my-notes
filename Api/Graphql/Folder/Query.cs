@@ -64,7 +64,7 @@ public class FolderQueries
         // fetch folders
         var folders = await services.FoldersInPath(userId, input.Path);
 
-        int pageSize = Math.Max(0, Math.Min(MAX_PAGE_SIZE, input.PageSize ?? DEFAULT_PAGE_SIZE));
+        int pageSize = Math.Max(1, Math.Min(MAX_PAGE_SIZE, input.PageSize ?? DEFAULT_PAGE_SIZE));
         double folderPerPage = folders.Count / pageSize;
         double totalFolderPages = Math.Ceiling(folderPerPage);
         int currentPage = 1; // implicit minimum 1 here
@@ -129,12 +129,12 @@ public class FolderQueries
             cursor = SearchCursorPagedEncoder.DecodeCursor<string, string>(input?.Cursor);
             if (cursor != null && direction == "asc")
                 // NOTE this is equivalent to (x.Title, x.Id) >= (title, id) in postgres; this is not natively supported by EF core
-                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) > 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0));
+                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) > 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) > 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) < 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0));
+                filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) < 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) < 0));
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == maxNotesToFetch + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].Title, notes[maxNotesToFetch].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1 && maxNotesToFetch > 0)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch - 1].Title, notes[maxNotesToFetch - 1].Id, currentPage + 1);
         }
 
         if (orderBy == "priority")
@@ -142,12 +142,12 @@ public class FolderQueries
             DecodedSearchCursorPaged<int, string>? cursor;
             cursor = SearchCursorPagedEncoder.DecodeCursor<int, string>(input?.Cursor);
             if (cursor != null && direction == "asc")
-                filteredNotes = filteredNotes.Where(x => x.Priority > cursor.Cursor1 || (x.Priority == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0));
+                filteredNotes = filteredNotes.Where(x => x.Priority > cursor.Cursor1 || (x.Priority == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) > 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.Priority < cursor.Cursor1 || (x.Priority == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0));
+                filteredNotes = filteredNotes.Where(x => x.Priority < cursor.Cursor1 || (x.Priority == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) < 0));
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == maxNotesToFetch + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].Priority, notes[maxNotesToFetch].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1 && maxNotesToFetch > 0)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch - 1].Priority, notes[maxNotesToFetch - 1].Id, currentPage + 1);
         }
 
         if (orderBy == "views")
@@ -155,12 +155,12 @@ public class FolderQueries
             DecodedSearchCursorPaged<int, string>? cursor;
             cursor = SearchCursorPagedEncoder.DecodeCursor<int, string>(input?.Cursor);
             if (cursor != null && direction == "asc")
-                filteredNotes = filteredNotes.Where(x => x.Views > cursor.Cursor1 || (x.Views == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) >= 0));
+                filteredNotes = filteredNotes.Where(x => x.Views > cursor.Cursor1 || (x.Views == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) > 0));
             if (cursor != null && direction == "desc")
-                filteredNotes = filteredNotes.Where(x => x.Views < cursor.Cursor1 || (x.Views == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) <= 0));
+                filteredNotes = filteredNotes.Where(x => x.Views < cursor.Cursor1 || (x.Views == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) < 0));
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == maxNotesToFetch + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].Views, notes[maxNotesToFetch].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1 && maxNotesToFetch > 0)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch - 1].Views, notes[maxNotesToFetch - 1].Id, currentPage + 1);
         }
 
         if (orderBy == "createdat")
@@ -171,13 +171,13 @@ public class FolderQueries
 
             if (cursor != null && direction == "asc")
                 filteredNotes = filteredNotes.Where(x => (x.CreatedAt > cursorTime) ||
-                                                        (x.CreatedAt == cursorTime && x.Id.CompareTo(cursor.Cursor2) >= 0));
+                                                        (x.CreatedAt == cursorTime && x.Id.CompareTo(cursor.Cursor2) > 0));
             if (cursor != null && direction == "desc")
                 filteredNotes = filteredNotes.Where(x => (x.CreatedAt < cursorTime) ||
-                                                        (x.CreatedAt == cursorTime && x.Id.CompareTo(cursor.Cursor2) <= 0));
+                                                        (x.CreatedAt == cursorTime && x.Id.CompareTo(cursor.Cursor2) < 0));
             notes = await filteredNotes.Take(maxNotesToFetch + 1).ToListAsync();
-            if (notes.Count == maxNotesToFetch + 1)
-                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch].CreatedAt?.Ticks ?? DateTime.MinValue.Ticks, notes[maxNotesToFetch].Id, currentPage + 1);
+            if (notes.Count == maxNotesToFetch + 1 && maxNotesToFetch > 0)
+                newCursor = SearchCursorPagedEncoder.EncodeCursor(notes[maxNotesToFetch - 1].CreatedAt?.Ticks ?? DateTime.MinValue.Ticks, notes[maxNotesToFetch - 1].Id, currentPage + 1);
         }
 
         List<Note> notesList = [];
