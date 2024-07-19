@@ -14,7 +14,7 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="font-sans bg-ligrey-0 flex-1 p-6">
+    <main className="font-sans bg-ligrey-0 flex-1 p-6 flex flex-col">
       <NotesListContextProvider>
         <NotesSearchContextProvider>
           <Header />

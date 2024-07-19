@@ -1,6 +1,8 @@
 "use client";
 
 import SpinnerSkCircle from "@/components/spinners/sk-circle";
+import LoadingSpinner from "@/components/theme/loading-spinner";
+import useThrottledState from "@/hooks/use-throttled-state";
 import { useContext, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import Folder from "./folder";
@@ -32,6 +34,7 @@ export default function Notes() {
     // without search
     if (search === "" && !loading && !searchLoading && inView && !endOfResults)
       fetchMore();
+    // with search
     if (
       search !== "" &&
       !loading &&
@@ -51,13 +54,24 @@ export default function Notes() {
     searchLoading,
   ]);
 
-  const notReady = search === "" && (loading || error);
-  const searchNotReady = search !== "" && (loading || error);
-  if (notReady || searchNotReady) {
-    return <section>Loading</section>;
+  const notReady = !!(search === "" && (loading || error));
+  const searchNotReady = !!(search !== "" && (searchLoading || searchError));
+  const throttledNotReady = useThrottledState(
+    notReady || searchNotReady,
+    400,
+    (value) => value === false
+  );
+
+  if (throttledNotReady) {
+    return (
+      <section className="col-span-1 xl:col-span-4 flex flex-col flex-1 justify-center items-center">
+        <LoadingSpinner className="h-12 w-12 text-theme-4" />
+        {/* <SpinnerSkCircle className="!mx-0 !my-2" /> */}
+        {/* <SpinnerSkRect className="!mx-0 !my-2" /> */}
+      </section>
+    );
   }
 
-  // FIXME loading
   // FIXME empty
   // FIXME components for each
   // FIXME drag & drop

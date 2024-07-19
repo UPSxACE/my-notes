@@ -16,19 +16,27 @@ type Options = {
 };
 
 export default function useQuerySearchNote(opts: Options = { query: "" }) {
+  const [calledOnce, setCalledOnce] = useState(false);
   const [options, setOptions] = useState({ pageSize: 16, ...opts });
-  const [fetch, { data, error, loading, refetch, fetchMore, called }] =
-    useSearchNoteLazyQuery({
-      variables: { input: options },
-    });
+  const [
+    fetch,
+    { data, error, loading, refetch, fetchMore, called, networkStatus },
+  ] = useSearchNoteLazyQuery({
+    variables: { input: options },
+    notifyOnNetworkStatusChange: true,
+  });
 
   useEffect(() => {
-    if (options.query !== "" && !called) fetch();
-  }, [options, called, fetch]);
+    if (options.query !== "" && !called) {
+      fetch();
+      setCalledOnce(true);
+    }
+  }, [options, called, fetch, calledOnce]);
 
   useEffect(() => {
-    //  && options.cursor !== data?.searchNote.cursor
-    if (called && options.cursor !== data?.searchNote.cursor) {
+    const cursor = options.cursor || null;
+    const _cursor = data?.searchNote.cursor || null;
+    if (called && cursor !== _cursor) {
       // REVIEW: maybe this is good enough, lets hope so.
       setOptions((prev) => ({ ...prev, cursor: data?.searchNote.cursor }));
     }
@@ -87,10 +95,12 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
     }
   }, [endOfResults, called, memoizedOptions, fetch, fetchMore]);
 
+  const queryChanged = networkStatus === 2;
+
   return {
     data: result,
     error,
-    loading,
+    loading: loading || queryChanged,
     refetch,
     fetchMore: _fetchMore,
     endOfResults,
