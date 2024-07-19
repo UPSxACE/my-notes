@@ -16,6 +16,7 @@ type Options = {
 };
 
 export default function useQuerySearchNote(opts: Options = { query: "" }) {
+  const [fetchingMore, setFetchingMore] = useState(false);
   const [calledOnce, setCalledOnce] = useState(false);
   const [options, setOptions] = useState({ pageSize: 16, ...opts });
   const [
@@ -76,6 +77,8 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
     if (endOfResults) return;
     if (memoizedOptions.query === "") return;
 
+    setFetchingMore(true);
+
     if (!called) {
       // NOTE: despite this being here, this will probably never happen
       console.log("!called situation happened");
@@ -83,7 +86,7 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
         variables: {
           input: memoizedOptions,
         },
-      });
+      }).finally(()=>{setFetchingMore(false)});
     }
 
     if (called) {
@@ -91,7 +94,7 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
         variables: {
           input: memoizedOptions,
         },
-      });
+      }).finally(()=>{setFetchingMore(false)});;
     }
   }, [endOfResults, called, memoizedOptions, fetch, fetchMore]);
 
@@ -100,7 +103,7 @@ export default function useQuerySearchNote(opts: Options = { query: "" }) {
   return {
     data: result,
     error,
-    loading: loading || queryChanged,
+    loading: loading || queryChanged || fetchingMore,
     refetch,
     fetchMore: _fetchMore,
     endOfResults,

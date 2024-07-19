@@ -23,6 +23,7 @@ type Context = {
   orderBy?: OrderBy;
   updateOrderBy: (newOrder: OrderBy) => void;
   resetCursor: () => void;
+  fetching: boolean;
 };
 
 const defaultValue: Context = {
@@ -33,6 +34,7 @@ const defaultValue: Context = {
   updatePath: (newPath: string) => {},
   updateOrderBy: (newOrder: OrderBy) => {},
   resetCursor: () => {},
+  fetching: true,
 };
 
 export const NotesListContext = createContext<Context>(defaultValue);
@@ -53,6 +55,7 @@ export default function NotesListContextProvider(props: {
     endOfResults,
     options,
     setOptions,
+    fetching,
   } = useQueryNavigate(orderByOptionsInitial.current);
 
   const router = useRouter();
@@ -115,6 +118,7 @@ export default function NotesListContextProvider(props: {
         orderBy,
         updateOrderBy,
         resetCursor,
+        fetching,
       }}
     >
       {props.children}

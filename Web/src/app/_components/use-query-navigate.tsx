@@ -12,12 +12,16 @@ type Options = {
 };
 
 export default function useQueryNavigate(opts: Options = {}) {
+  const [fetchingMore, setFetchingMore] = useState(false);
   const [options, setOptions] = useState({ pageSize: 16, ...opts });
-  const { data, error, loading, refetch, fetchMore } = useNavigateQuery({
-    variables: { input: options },
-  });
+  const { data, error, loading, refetch, fetchMore, networkStatus } =
+    useNavigateQuery({
+      variables: { input: options },
+      notifyOnNetworkStatusChange: true,
+    });
 
   useEffect(() => {
+    console.log("RECEIVED DATA");
     // console.log("next fetch with:", data?.navigate.cursor);
     setOptions((prev) => ({ ...prev, cursor: data?.navigate.cursor }));
   }, [data]);
@@ -52,13 +56,16 @@ export default function useQueryNavigate(opts: Options = {}) {
     ]
   );
 
-  const _fetchMore = useCallback(() => {
+  const _fetchMore = useCallback(async () => {
     if (endOfResults) return;
+    setFetchingMore(true);
     // console.log("fetch more with: ", options.cursor);
-    fetchMore({
+    await fetchMore({
       variables: {
         input: memoizedOptions,
       },
+    }).finally(() => {
+      setFetchingMore(false);
     });
     // REVIEW: test this with 3+ pages. maybe its needed, maybe its not
     // .then((res) => {
@@ -66,14 +73,17 @@ export default function useQueryNavigate(opts: Options = {}) {
     // });
   }, [endOfResults, memoizedOptions, fetchMore]);
 
+  const fetching = fetchingMore || (networkStatus !== 7 && networkStatus !== 8);
+
   return {
     data: result,
     error,
-    loading,
+    loading: networkStatus === 1,
     refetch,
     fetchMore: _fetchMore,
     endOfResults,
     options,
     setOptions, //TODO ? cache cursor
+    fetching,
   };
 }

@@ -2,18 +2,28 @@
 
 import SpinnerSkCircle from "@/components/spinners/sk-circle";
 import LoadingSpinner from "@/components/theme/loading-spinner";
+import useDoOnce from "@/hooks/use-do-once";
 import useThrottledState from "@/hooks/use-throttled-state";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import Folder from "./folder";
 import Note from "./note";
 import { NotesListContext } from "./notes-list-context";
 import { NotesSearchContext } from "./notes-search-context";
+import useToggle from "@/hooks/use-toggle";
 
 export default function Notes() {
+  // const [inViewCalculated, setInViewCalculated] = useState()
   // Without search
-  const { data, loading, fetchMore, error, endOfResults, updatePath } =
-    useContext(NotesListContext);
+  const {
+    data,
+    loading,
+    fetchMore,
+    error,
+    endOfResults,
+    updatePath,
+    fetching,
+  } = useContext(NotesListContext);
   const { ref, inView, entry } = useInView({
     threshold: 0,
   });
@@ -30,29 +40,41 @@ export default function Notes() {
   } = useContext(NotesSearchContext);
   const filteredNotes = searchData?.results || [];
 
-  useEffect(() => {
+  const becauseNotes =
+    search === "" &&
+    !(loading || fetching) &&
+    !searchLoading &&
+    inView &&
+    !endOfResults;
+
+  const becauseSearch =
+    search !== "" &&
+    !(loading || fetching) &&
+    !searchLoading &&
+    inView &&
+    !searchEndOfResults;
+
+  const shouldFetch = useMemo(() => {
+    return becauseNotes || becauseSearch;
+  }, [becauseNotes, becauseSearch]);
+
+  const fetch = useDoOnce(() => {
     // without search
-    if (search === "" && !loading && !searchLoading && inView && !endOfResults)
-      fetchMore();
+    if (shouldFetch && becauseNotes) fetchMore();
     // with search
-    if (
-      search !== "" &&
-      !loading &&
-      !searchLoading &&
-      inView &&
-      !searchEndOfResults
-    )
-      searchFetchMore();
-  }, [
+    if (shouldFetch && becauseSearch) searchFetchMore();
+  }, [shouldFetch, becauseNotes, becauseSearch]);
+
+  console.log(
+    search === "",
+    !(loading || fetching),
+    !searchLoading,
     inView,
-    endOfResults,
-    fetchMore,
-    search,
-    searchEndOfResults,
-    searchFetchMore,
-    loading,
-    searchLoading,
-  ]);
+    !endOfResults
+  );
+  useEffect(() => {
+    fetch();
+  }, [shouldFetch, becauseNotes, becauseSearch, fetch]);
 
   const notReady = !!(search === "" && (loading || error));
   const searchNotReady = !!(search !== "" && (searchLoading || searchError));
