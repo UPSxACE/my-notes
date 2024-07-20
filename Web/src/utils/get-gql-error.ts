@@ -1,8 +1,7 @@
-import { ApolloError } from "@apollo/client";
-
 export default function getGqlErrorMessage(
-  apolloError: ApolloError
+  apolloError: any // ApolloError // FIXME
 ): string | null {
+  console.log("ERR:", apolloError);
   const error: unknown =
     //@ts-ignore
     apolloError?.networkError?.result?.errors?.[0]?.message ||

@@ -1,6 +1,5 @@
 "use client";
 import { CursorSearchOfListOfNote } from "@/gql/graphql.schema";
-import { ApolloError } from "@apollo/client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ReactNode,
@@ -14,10 +13,11 @@ import useQuerySearchNote from "./use-query-search-note";
 
 type Context = {
   data: CursorSearchOfListOfNote;
-  fetchMore: () => void;
-  loading: boolean;
-  error?: ApolloError;
-  endOfResults: boolean;
+  error: Error | null;
+  isFetching: boolean;
+  isLoading: boolean;
+  fetchNextPage: () => Promise<any>;
+  hasNextPage: boolean;
   search: string;
   updateSearch: (newSearch: string) => void;
   resetCursor: () => void;
@@ -25,9 +25,11 @@ type Context = {
 
 const defaultValue: Context = {
   data: { cursor: null, results: [] },
-  fetchMore: () => {},
-  loading: true,
-  endOfResults: false,
+  error: null,
+  isFetching: true,
+  isLoading: true,
+  fetchNextPage: async () => {},
+  hasNextPage: false,
   search: "",
   updateSearch: (newSearch: string) => {},
   resetCursor: () => {},
@@ -48,11 +50,12 @@ export default function NotesSearchContextProvider(props: {
   });
   //   const orderByOptionsInitial = useRef(enumToOptions(orderBy));
   const {
-    data = defaultValue.data,
+    data,
     error,
-    loading,
-    fetchMore,
-    endOfResults,
+    isFetching,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
     options,
     setOptions,
   } = useQuerySearchNote(orderByOptionsInitial.current);
@@ -85,13 +88,14 @@ export default function NotesSearchContextProvider(props: {
     const orderByOptions = enumToOptions(orderBy);
     if (
       orderByOptions.direction !== options.direction ||
-      orderByOptions.orderBy !== options.orderBy || search !== options.query
+      orderByOptions.orderBy !== options.orderBy ||
+      search !== options.query
     ) {
       setOptions((prev) => ({
         ...prev,
         query: search,
         ...orderByOptions,
-        cursor: undefined, // cursor should be resetted when search or orderBy changes
+        // cursor: undefined, // cursor should be resetted when search or orderBy changes // REVIEW: maybe not needed in react query
       }));
     }
   }, [orderBy, search, setOptions, options]);
@@ -104,10 +108,11 @@ export default function NotesSearchContextProvider(props: {
     <NotesSearchContext.Provider
       value={{
         data,
-        fetchMore,
-        loading,
         error,
-        endOfResults,
+        isFetching,
+        isLoading,
+        fetchNextPage,
+        hasNextPage,
         search,
         updateSearch,
         resetCursor,

@@ -1,6 +1,5 @@
 "use client";
 import { PathNodes } from "@/gql/graphql";
-import { ApolloError } from "@apollo/client";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   ReactNode,
@@ -14,27 +13,26 @@ import useQueryNavigate from "./use-query-navigate";
 
 type Context = {
   data: PathNodes;
-  fetchMore: () => void;
-  loading: boolean;
-  error?: ApolloError;
-  endOfResults: boolean;
+  error: Error | null;
+  isFetching: boolean;
+  isLoading: boolean;
+  fetchNextPage: () => Promise<any>;
+  hasNextPage: boolean;
   path?: string;
   updatePath: (newPath: string) => void;
   orderBy?: OrderBy;
   updateOrderBy: (newOrder: OrderBy) => void;
-  resetCursor: () => void;
-  fetching: boolean;
 };
 
 const defaultValue: Context = {
   data: { cursor: null, folders: [], notes: [] },
-  fetchMore: () => {},
-  loading: true,
-  endOfResults: false,
+  error: null,
+  isFetching: true,
+  isLoading: true,
+  fetchNextPage: async () => {},
+  hasNextPage: false,
   updatePath: (newPath: string) => {},
   updateOrderBy: (newOrder: OrderBy) => {},
-  resetCursor: () => {},
-  fetching: true,
 };
 
 export const NotesListContext = createContext<Context>(defaultValue);
@@ -48,14 +46,14 @@ export default function NotesListContextProvider(props: {
 
   const orderByOptionsInitial = useRef({ path, ...enumToOptions(orderBy) });
   const {
-    data = defaultValue.data,
+    data,
     error,
-    loading,
-    fetchMore,
-    endOfResults,
+    isFetching,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
     options,
     setOptions,
-    fetching,
   } = useQueryNavigate(orderByOptionsInitial.current);
 
   const router = useRouter();
@@ -97,28 +95,27 @@ export default function NotesListContextProvider(props: {
         ...prev,
         path,
         ...orderByOptions,
-        cursor: undefined, // cursor should be resetted when path or orderBy changes
+        // cursor: undefined, // cursor should be resetted when path or orderBy changes // REVIEW: maybe not needed in react query
       }));
   }, [path, orderBy, setOptions, options]);
 
-  function resetCursor() {
-    setOptions((prev) => ({ ...prev, cursor: undefined }));
-  }
+  // FIXME
+  // function resetCursor() {
+  //   setOptions((prev) => ({ ...prev, cursor: undefined }));
+  // }
 
   return (
     <NotesListContext.Provider
       value={{
         data,
-        fetchMore,
-        loading,
         error,
-        endOfResults,
+        isFetching,
+        isLoading,
+        fetchNextPage,
+        hasNextPage,
         path,
         updatePath,
-        orderBy,
         updateOrderBy,
-        resetCursor,
-        fetching,
       }}
     >
       {props.children}

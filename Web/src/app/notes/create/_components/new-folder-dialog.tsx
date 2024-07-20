@@ -14,13 +14,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
-import { useCreateFolderMutation } from "@/gql/graphql.schema";
-import useToggle from "@/hooks/use-toggle";
+import { CreateFolderDocument } from "@/gql/graphql";
+import { CreateFolderInput } from "@/gql/graphql.schema";
+import gqlClient from "@/http/client";
 import getGqlErrorMessage from "@/utils/get-gql-error";
 import { ReactState } from "@/utils/react-state-type";
 import { notifyError } from "@/utils/toaster-notifications";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 import { Flipped } from "react-flip-toolkit";
 import { useForm } from "react-hook-form";
 import { BiArrowBack } from "react-icons/bi";
@@ -58,25 +60,28 @@ export default function NewFolderDialog(props: Props) {
     ...rest
   } = props;
 
-  const [loading, setLoading] = useToggle(false);
-  // state to wait for cache eviction
-  const [readyToLeave, setReadyToLeave] = useState(false);
-  useEffect(() => {
-    if (readyToLeave && !selectorLoading) {
-      setReadyToLeave(false);
-      setLoading(false);
-      changeToDefault();
-    }
-  }, [readyToLeave, setLoading, changeToDefault, selectorLoading]);
+  const client = useQueryClient();
 
-  const [createFolder] = useCreateFolderMutation({
-    // refetchQueries: ["ownNoteTags", "ownFolders", "navigate"],
-    update(cache) {
-      cache.evict({ fieldName: "ownNoteTags" });
-      cache.evict({ fieldName: "ownFolders" });
-      cache.evict({ fieldName: "navigate" });
+  const {
+    data,
+    reset,
+    error,
+    isPending,
+    isSuccess,
+    mutate: createFolder,
+  } = useMutation({
+    mutationFn: (data: CreateFolderInput) =>
+      gqlClient.request(CreateFolderDocument, { input: data }),
+    onSuccess: (data, variables) => {
+      const createdFolder = data.createFolder;
+      if (!createdFolder) throw new Error("An unexpected error has occurred.");
+
+      client.invalidateQueries({ queryKey: ["own-folders"] });
+      client.invalidateQueries({ queryKey: ["navigate"] });
     },
   });
+
+  const loading = isPending || isSuccess;
 
   const [_, setFolder] = folderState;
   const [localSelection, setLocalSelection] = localSelectionState;
@@ -98,31 +103,37 @@ export default function NewFolderDialog(props: Props) {
     if (fullPath !== "/") fullPath += "/";
     fullPath += values.path;
 
-    setLoading(true);
     createFolder({
-      variables: {
-        input: {
-          path: fullPath,
-          priority: values.priority,
-        },
-      },
-    })
-      .then(async (result) => {
-        // await refetchFolders().then(() => {
-        const newFolderPath = result?.data?.createFolder?.path;
-        if (newFolderPath) {
-          setFolder(newFolderPath);
-          setLocalSelection(newFolderPath);
-        }
-        setReadyToLeave(true);
-        // });
-      })
-      .catch((e) => {
-        notifyError();
-        console.log(getGqlErrorMessage(e));
-        setLoading(false);
-      });
+      path: fullPath,
+      priority: values.priority,
+    });
   };
+
+  const newFolderPath = data?.createFolder?.path;
+  useEffect(() => {
+    if (error) {
+      notifyError();
+      console.log(getGqlErrorMessage(error)); //FIXME remove all of these(deprecated), or replace them by a better one
+    }
+    if (isSuccess) {
+      form.reset();
+      reset();
+      if (newFolderPath) {
+        setFolder(newFolderPath);
+        setLocalSelection(newFolderPath);
+      }
+      changeToDefault();
+    }
+  }, [
+    error,
+    isSuccess,
+    form,
+    reset,
+    newFolderPath,
+    setFolder,
+    setLocalSelection,
+    changeToDefault,
+  ]);
 
   return (
     <div className={"bg-white overflow-hidden shadow-md rounded-md"} {...rest}>

@@ -1,27 +1,23 @@
 "use client";
 
-import { useOwnFoldersQuery } from "@/gql/graphql.schema";
+import { OwnFoldersDocument } from "@/gql/graphql";
 import useDoOnce from "@/hooks/use-do-once";
+import gqlClient from "@/http/client";
 import { notifyFatal } from "@/utils/toaster-notifications";
+import { useQuery } from "@tanstack/react-query";
 
 export default function useQueryFolders() {
-  //, networkStatus
-  const { data, error, loading, refetch } = useOwnFoldersQuery({
-    notifyOnNetworkStatusChange: true,
+  const { data, error, isLoading, refetch } = useQuery({
+    queryKey: ["own-folders"],
+    queryFn: async () => gqlClient.request(OwnFoldersDocument, {}),
   });
-  const allFolders = data?.ownFolders;
+  const tags = data?.ownFolders;
 
   const notifyErrorOnce = useDoOnce(() => notifyFatal());
 
-  if (!loading && error) {
+  if (!isLoading && error) {
     notifyErrorOnce();
   }
 
-  return {
-    data: allFolders,
-    error,
-    loading,
-    refetch,
-    //refetching: networkStatus === 4,
-  };
+  return { data: tags, error, isLoading, refetch };
 }

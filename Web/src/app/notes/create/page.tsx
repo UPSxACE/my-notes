@@ -3,9 +3,11 @@ import CtaButton from "@/components/theme/app/cta-button";
 import { CustomizeAppHeaderContext } from "@/context/customize-app-header";
 import BlockEditor from "@/extensions/_components/BlockEditor/BlockEditor";
 import useBlockEditor from "@/extensions/_components/BlockEditor/use-block-editor";
-import { useCreateNoteMutation } from "@/gql/graphql.schema";
-import getGqlErrorMessage from "@/utils/get-gql-error";
+import { CreateNoteDocument } from "@/gql/graphql";
+import { CreateNoteInput } from "@/gql/graphql.schema";
+import gqlClient from "@/http/client";
 import { notifyError } from "@/utils/toaster-notifications";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import clsx from "clsx";
 import { Inter } from "next/font/google";
 import { useRouter } from "next/navigation";
@@ -19,9 +21,9 @@ const inter = Inter({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-// const Editor = dynamic(() => import("./_components/editor"), {
-//   ssr: false,
 //   // loading: () => (
+// const Editor = dynamic(() => import("./_components/editor"), {
+//   ssr: fals,
 //   //   <div className="h-0 w-0 overflow-hidden">
 //   //     <p>SEO...</p>
 //   //   </div>
@@ -35,17 +37,28 @@ export default function CreateNotePage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { editor, json, text } = useBlockEditor({});
   // gql
-  const [createNote] = useCreateNoteMutation({
-    // refetchQueries: ["ownNoteTags", "navigate"],
-    update(cache) {
-      cache.evict({ fieldName: "ownNoteTags" });
-      cache.evict({ fieldName: "ownFolders" });
-      cache.evict({ fieldName: "navigate" });
+  const client = useQueryClient();
+  const {
+    data,
+    reset,
+    error,
+    isPending,
+    isSuccess,
+    mutate: createNote,
+  } = useMutation({
+    mutationFn: (data: CreateNoteInput) =>
+      gqlClient.request(CreateNoteDocument, { input: data }),
+    onSuccess: (data, variables) => {
+      client.invalidateQueries({ queryKey: ["own-note-tags"] });
+      client.invalidateQueries({ queryKey: ["own-folders"] });
+      client.invalidateQueries({ queryKey: ["navigate"] });
     },
   });
+
   // state
+  const [checking, setChecking] = useState(false);
+  const loading = isPending || isSuccess || checking;
   const [valid, setValid] = useState(false);
-  const [loading, setLoading] = useState(false);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const priorityRef = useRef<HTMLInputElement>(null);
   const [tags, setTags] = useState<TagSuggestion[]>([]);
@@ -63,30 +76,21 @@ export default function CreateNotePage() {
       const priorityValue = Number(priorityRef?.current?.value);
       if (isNaN(priorityValue)) return;
       // validate the priority html input element min/max attributes
-      if (!priorityRef.current?.checkValidity())
+      setChecking(true);
+      if (!priorityRef.current?.checkValidity()) {
+        setChecking(false);
         return priorityRef.current?.reportValidity();
+      }
 
-      setLoading(true);
+      setChecking(false);
       createNote({
-        variables: {
-          input: {
-            title: titleRef?.current?.value || "",
-            content: JSON.stringify(json || ""),
-            contentText: text,
-            priority: priorityValue,
-            tags: tags.map((x) => x.value?.toString() || ""),
-            folderPath: folder,
-          },
-        },
-      })
-        .then(() => {
-          router.push("/");
-        })
-        .catch((e) => {
-          notifyError();
-          console.log(getGqlErrorMessage(e));
-          setLoading(false);
-        });
+        title: titleRef?.current?.value || "",
+        content: JSON.stringify(json || ""),
+        contentText: text,
+        priority: priorityValue,
+        tags: tags.map((x) => x.value?.toString() || ""),
+        folderPath: folder,
+      });
     }
 
     setCustomEnd(
@@ -112,6 +116,16 @@ export default function CreateNotePage() {
     tags,
     text,
   ]);
+
+  useEffect(() => {
+    if (error) {
+      notifyError();
+    }
+    if (isSuccess) {
+      router.push("/");
+      reset();
+    }
+  }, [error, isSuccess, reset, router]);
 
   return (
     <main

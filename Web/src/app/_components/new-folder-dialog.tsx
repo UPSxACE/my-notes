@@ -15,21 +15,26 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Label } from "@/components/ui/label";
+import { CreateFolderDocument } from "@/gql/graphql";
 import {
-  NavigateDocument,
+  CreateFolderInput,
+  Folder,
   NavigateQuery,
-  useCreateFolderMutation,
+  Note,
 } from "@/gql/graphql.schema";
-import useToggle from "@/hooks/use-toggle";
+import gqlClient from "@/http/client";
 import getGqlErrorMessage from "@/utils/get-gql-error";
 import { compareUidsV7, sortFoldersByUidAsc } from "@/utils/sorting-helpers";
 import { notifyError } from "@/utils/toaster-notifications";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useContext } from "react";
+import {
+  InfiniteData,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { NotesListContext } from "./notes-list-context";
-import { NotesSearchContext } from "./notes-search-context";
 
 type Props = {
   path?: string;
@@ -51,91 +56,80 @@ const formSchema = z.object({
 
 export default function NewFolderDialog(props: Props) {
   const { path, orderBy, direction, afterSave } = props;
-  const { resetCursor } = useContext(NotesListContext);
-  const { search, resetCursor: resetSearchCursor } =
-    useContext(NotesSearchContext);
 
-  const [createFolder, { client }] = useCreateFolderMutation({
-    update(cache, result, { context, variables }) {
-      // resetCursor();
-      // resetSearchCursor();
-      // cache.evict({ fieldName: "navigate" });
+  const client = useQueryClient();
 
-      cache.evict({
-        fieldName: "ownFolders",
-      });
-
-      resetSearchCursor();
-      if (search !== "") {
-        cache.evict({
-          fieldName: "navigate",
-        });
-        cache.evict({
-          fieldName: "search-note",
-        });
-
-        // NOTE: one thing cache eviction doesn't do is resetting the cursors!
-        // So we have to manually do it whenever the query is in a component that is mounted right now, and not being used!
-        // (If it is being used, then update the cache instead; this specific case is an exception, because it doesn't matter
-        // if we just force a refresh by both evicting the cache and resetting the cursor in a search after a creation of something)
-        resetCursor();
-        return;
-      }
-
-      const createdFolder = result.data?.createFolder;
-
-      const currentCache = cache.readQuery<NavigateQuery>({
-        query: NavigateDocument,
-        variables: { input: { orderBy, path, direction } },
-      });
-
-      // Array must be reconstructed, because it is a readonly reference
-      let updatedFolders = Array.from(currentCache?.navigate.folders || []);
-      const updatedNotes = Array.from(currentCache?.navigate.notes || []);
-
+  const {
+    data,
+    reset,
+    error,
+    isPending,
+    isSuccess,
+    mutate: createFolder,
+  } = useMutation({
+    mutationFn: (data: CreateFolderInput) =>
+      gqlClient.request(CreateFolderDocument, { input: data }),
+    onSuccess: (data, variables) => {
+      const createdFolder = data.createFolder;
       if (!createdFolder) throw new Error("An unexpected error has occurred.");
 
-      const lastFolder = updatedFolders[updatedFolders.length - 1];
-      const comparisonWithLast = lastFolder
-        ? compareUidsV7(createdFolder.id, lastFolder.id)
-        : 0;
-      if (comparisonWithLast <= 0 || updatedNotes.length > 0) {
-        // if there is no folders (0) or if there is folders, but it would be placed in the middle of them (-1),~
-        // OR if notes already started being fetched...
-        // then push it to the cache, and then re-sort them
-        // FIXME there is an edge case that most likely needs to be fixed: when exactly 16 folders exist, 
-        // and a 17th just got added, and NO NOTES were fetched yet.
-        updatedFolders.push(createdFolder);
-        updatedFolders = sortFoldersByUidAsc(updatedFolders);
-      }
+      client.invalidateQueries({ queryKey: ["own-folders"] });
+      client.setQueriesData(
+        { queryKey: ["navigate"] },
+        (cachedData?: InfiniteData<NavigateQuery>) => {
+          if (!cachedData) return;
 
-      cache.evict({
-        fieldName: "navigate",
-        broadcast: false,
-      });
+          // NOTE: the concept of "pages" is not applied to our project, because
+          // we are using infinite scroll, so in the end we will merge the cache in one single page anyways
+          let cachedFolders: Folder[] = [];
+          let cachedNotes: Note[] = [];
+          let lastCursor: string | null | undefined;
+          cachedData.pages.forEach((page) => {
+            cachedFolders.push(...page.navigate.folders);
+            cachedNotes.push(...page.navigate.notes);
+            lastCursor = page.navigate.cursor;
+          });
 
-      const currentData = {
-        navigate: {
-          cursor: currentCache?.navigate.cursor,
-          folders: updatedFolders,
-          notes: updatedNotes,
-        },
-      };
+          const lastFolder = cachedFolders[cachedFolders.length - 1];
+          const comparisonWithLast = lastFolder
+            ? compareUidsV7(createdFolder.id, lastFolder.id)
+            : 0;
 
-      cache.writeQuery({
-        query: NavigateDocument,
-        variables: {
-          input: {
-            orderBy,
-            path,
-            direction,
-          },
-        },
-        data: currentData,
-      });
+          const lastButNoCursor = comparisonWithLast === 1 && !!!lastCursor;
+          if (
+            lastButNoCursor ||
+            comparisonWithLast <= 0 ||
+            cachedNotes.length > 0
+          ) {
+            // if there is no folders (0) or if there is folders, but it would be placed in the middle of them (-1),
+            // or if it would be the LAST folder(1), but there is no cursor,
+            // OR if notes already started being fetched...
+            // then push it to the cache, and then re-sort them
+            // FIXME there is an edge case that most likely needs to be fixed: when exactly 16 folders exist,
+            // and a 17th just got added, and NO NOTES were fetched yet.
+            // (or maybe not because of the 'no cursor' condition)
+            cachedFolders.push(createdFolder);
+            cachedFolders = sortFoldersByUidAsc(cachedFolders);
+          }
+
+          return {
+            ...cachedData,
+            pages: [
+              {
+                navigate: {
+                  cursor: lastCursor,
+                  folders: cachedFolders,
+                  notes: cachedNotes,
+                },
+              },
+            ],
+          };
+        }
+      );
     },
   });
-  const [loading, setLoading] = useToggle(false);
+
+  const loading = isPending || isSuccess;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -150,26 +144,23 @@ export default function NewFolderDialog(props: Props) {
     if (fullPath !== "/") fullPath += "/";
     fullPath += values.path;
 
-    setLoading(true);
     createFolder({
-      variables: {
-        input: {
-          path: fullPath || "/",
-          priority: values.priority,
-        },
-      },
-    })
-      .then(async (result) => {
-        setLoading(false);
-        form.reset();
-        afterSave();
-      })
-      .catch((e) => {
-        notifyError();
-        console.log(getGqlErrorMessage(e));
-        setLoading(false);
-      });
+      path: fullPath || "/",
+      priority: values.priority,
+    });
   };
+
+  useEffect(() => {
+    if (error) {
+      notifyError();
+      console.log(getGqlErrorMessage(error)); //FIXME remove all of these(deprecated), or replace them by a better one
+    }
+    if (isSuccess) {
+      form.reset();
+      reset();
+      afterSave();
+    }
+  }, [error, isSuccess, afterSave, form, reset]);
 
   return (
     <DialogContent className="font-sans gap-0 p-0 border-0 !rounded-md bg-transparent shadow-none max-w-none w-fit">

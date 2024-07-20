@@ -3,88 +3,75 @@
 import SpinnerSkCircle from "@/components/spinners/sk-circle";
 import LoadingSpinner from "@/components/theme/loading-spinner";
 import useDoOnce from "@/hooks/use-do-once";
-import useThrottledState from "@/hooks/use-throttled-state";
-import { useContext, useEffect, useMemo, useState } from "react";
+import { notifyFatal } from "@/utils/toaster-notifications";
+import { useContext, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import Folder from "./folder";
 import Note from "./note";
 import { NotesListContext } from "./notes-list-context";
 import { NotesSearchContext } from "./notes-search-context";
-import useToggle from "@/hooks/use-toggle";
 
 export default function Notes() {
   // const [inViewCalculated, setInViewCalculated] = useState()
   // Without search
   const {
     data,
-    loading,
-    fetchMore,
+    isLoading,
+    isFetching,
+    fetchNextPage,
     error,
-    endOfResults,
+    hasNextPage,
     updatePath,
-    fetching,
   } = useContext(NotesListContext);
   const { ref, inView, entry } = useInView({
     threshold: 0,
   });
-  const folders = data?.folders || [];
-  const notes = data?.notes || [];
+  const folders = data.folders;
+  const notes = data.notes;
   // With search
   const {
     data: searchData,
-    loading: searchLoading,
-    fetchMore: searchFetchMore,
+    isLoading: searchIsLoading,
+    isFetching: searchIsFetching,
+    fetchNextPage: searchFetchNextPage,
     error: searchError,
-    endOfResults: searchEndOfResults,
+    hasNextPage: searchHasNextPage,
     search,
   } = useContext(NotesSearchContext);
-  const filteredNotes = searchData?.results || [];
+  const filteredNotes = searchData.results;
 
-  const becauseNotes =
-    search === "" &&
-    !(loading || fetching) &&
-    !searchLoading &&
-    inView &&
-    !endOfResults;
-
-  const becauseSearch =
-    search !== "" &&
-    !(loading || fetching) &&
-    !searchLoading &&
-    inView &&
-    !searchEndOfResults;
-
-  const shouldFetch = useMemo(() => {
-    return becauseNotes || becauseSearch;
-  }, [becauseNotes, becauseSearch]);
-
-  const fetch = useDoOnce(() => {
-    // without search
-    if (shouldFetch && becauseNotes) fetchMore();
-    // with search
-    if (shouldFetch && becauseSearch) searchFetchMore();
-  }, [shouldFetch, becauseNotes, becauseSearch]);
-
-  console.log(
-    search === "",
-    !(loading || fetching),
-    !searchLoading,
-    inView,
-    !endOfResults
-  );
   useEffect(() => {
-    fetch();
-  }, [shouldFetch, becauseNotes, becauseSearch, fetch]);
+    const isAnyLoading = isLoading || searchIsFetching || searchIsLoading;
+    if (!isAnyLoading && search === "" && hasNextPage) {
+      fetchNextPage();
+    }
+    if (!isAnyLoading && search !== "" && searchHasNextPage) {
+      searchFetchNextPage();
+    }
+  }, [
+    isLoading,
+    searchIsFetching,
+    searchIsLoading,
+    search,
+    hasNextPage,
+    searchHasNextPage,
+    fetchNextPage,
+    searchFetchNextPage,
+  ]);
 
-  const notReady = !!(search === "" && (loading || error));
-  const searchNotReady = !!(search !== "" && (searchLoading || searchError));
-  const throttledNotReady = useThrottledState(
-    notReady || searchNotReady,
-    400,
-    (value) => value === false
+  const notReady = !!(search === "" && (isLoading || error));
+  const searchNotReady = !!(
+    search !== "" &&
+    (searchIsFetching || searchIsLoading || searchError)
   );
 
-  if (throttledNotReady) {
+  const notifyErrorOnce = useDoOnce(() => notifyFatal());
+
+  if (notReady || searchNotReady) {
+    if (error) {
+      notifyErrorOnce();
+    }
+
     return (
       <section className="col-span-1 xl:col-span-4 flex flex-col flex-1 justify-center items-center">
         <LoadingSpinner className="h-12 w-12 text-theme-4" />
@@ -130,24 +117,18 @@ export default function Notes() {
         filteredNotes.map((n, index) => {
           return <Note key={index} note={n} />;
         })}
-      {search === "" && !loading && !error && !endOfResults && (
+      {search === "" && hasNextPage && (
         <div ref={ref} className="col-span-1 xl:col-span-4 flex justify-center">
           {/* <LoadingSpinner className="h-10 w-10" /> */}
           <SpinnerSkCircle className="!mx-0 !my-2" />
         </div>
       )}
-      {search !== "" &&
-        !searchLoading &&
-        !searchError &&
-        !searchEndOfResults && (
-          <div
-            ref={ref}
-            className="col-span-1 xl:col-span-4 flex justify-center"
-          >
-            {/* <LoadingSpinner className="h-10 w-10" /> */}
-            <SpinnerSkCircle className="!mx-0 !my-2" />
-          </div>
-        )}
+      {search !== "" && searchHasNextPage && (
+        <div ref={ref} className="col-span-1 xl:col-span-4 flex justify-center">
+          {/* <LoadingSpinner className="h-10 w-10" /> */}
+          <SpinnerSkCircle className="!mx-0 !my-2" />
+        </div>
+      )}
       {/* <BaseButton onClick={fetchMore}>Load more</BaseButton> */}
     </section>
   );

@@ -1,13 +1,13 @@
 import { auth } from "@/auth";
-import ApolloClientProvider from "@/context/apollo";
+import QueryProvider from "@/context/query";
 import WebsocketProvider from "@/context/websocket";
 import { cn } from "@/lib/utils";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import { Inter, Poppins } from "next/font/google";
 import { Toaster } from "sonner";
 import "./globals.css";
 import RootLayoutPrivate from "./layout-private";
-import { Inter, Poppins } from "next/font/google";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,14 +34,14 @@ export default async function RootLayout({
 
   return (
     <WebsocketProvider>
-      <ApolloClientProvider>
+      <QueryProvider>
         <html lang="en" className="scroll-smooth">
           <body className={cn(fontSans.variable, inter.className)}>
             <RootLayoutPrivate>{children}</RootLayoutPrivate>
             <Toaster richColors />
           </body>
         </html>
-      </ApolloClientProvider>
+      </QueryProvider>
     </WebsocketProvider>
   );
 }

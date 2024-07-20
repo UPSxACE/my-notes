@@ -1,11 +1,12 @@
 "use client";
+import { SearchNoteDocument } from "@/gql/graphql";
 import {
   CursorSearchOfListOfNote,
-  useSearchNoteLazyQuery,
+  SearchNoteQuery,
 } from "@/gql/graphql.schema";
-import useDoOnce from "@/hooks/use-do-once";
-import { notifyFatal } from "@/utils/toaster-notifications";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import gqlClient from "@/http/client";
+import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 type Options = {
   cursor?: string | null;
@@ -15,99 +16,78 @@ type Options = {
   pageSize?: number;
 };
 
+type CursorType = string | null | undefined;
+
 export default function useQuerySearchNote(opts: Options = { query: "" }) {
-  const [fetchingMore, setFetchingMore] = useState(false);
-  const [calledOnce, setCalledOnce] = useState(false);
   const [options, setOptions] = useState({ pageSize: 16, ...opts });
-  const [
-    fetch,
-    { data, error, loading, refetch, fetchMore, called, networkStatus },
-  ] = useSearchNoteLazyQuery({
-    variables: { input: options },
-    notifyOnNetworkStatusChange: true,
+
+  const {
+    data,
+    error,
+    isFetching,
+    isLoading,
+    fetchNextPage,
+    fetchPreviousPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
+    ...result
+  } = useInfiniteQuery<
+    SearchNoteQuery,
+    Error,
+    InfiniteData<SearchNoteQuery, CursorType>,
+    string[],
+    CursorType
+  >({
+    enabled: opts.query !== "",
+    initialPageParam: undefined,
+    queryKey: [
+      "search-note",
+      options.query || "",
+      options.orderBy || "",
+      options.direction || "",
+    ],
+    queryFn: async ({ pageParam }) =>
+      gqlClient.request(SearchNoteDocument, {
+        input: { ...options, cursor: pageParam },
+      }),
+    getNextPageParam: (lastPage, allPages, lastPageParam, allPageParams) =>
+      lastPage.searchNote.cursor,
+    getPreviousPageParam: (
+      firstPage,
+      allPages,
+      firstPageParam,
+      allPageParams
+    ) => firstPage.searchNote.cursor,
   });
 
-  useEffect(() => {
-    if (options.query !== "" && !called) {
-      fetch();
-      setCalledOnce(true);
-    }
-  }, [options, called, fetch, calledOnce]);
-
-  useEffect(() => {
-    const cursor = options.cursor || null;
-    const _cursor = data?.searchNote.cursor || null;
-    if (called && cursor !== _cursor) {
-      // REVIEW: maybe this is good enough, lets hope so.
-      setOptions((prev) => ({ ...prev, cursor: data?.searchNote.cursor }));
-    }
-  }, [options, data, called]);
-
-  // if query is empty, results should be empty array
-  const result: CursorSearchOfListOfNote =
-    options.query !== "" && data
-      ? data.searchNote
-      : { cursor: null, results: [] };
-  const notifyErrorOnce = useDoOnce(() => notifyFatal());
-
-  if (!loading && error) {
-    notifyErrorOnce();
-  }
-
-  const endOfResults = !loading && !result?.cursor;
-
-  const memoizedOptions: Options = useMemo(
-    () => ({
-      cursor: options.cursor,
-      direction: options.direction,
-      orderBy: options.orderBy,
-      pageSize: options.pageSize,
-      query: options.query,
-    }),
-    [
-      options.cursor,
-      options.direction,
-      options.orderBy,
-      options.pageSize,
-      options.query,
-    ]
-  );
-
-  const _fetchMore = useCallback(() => {
-    if (endOfResults) return;
-    if (memoizedOptions.query === "") return;
-
-    setFetchingMore(true);
-
-    if (!called) {
-      // NOTE: despite this being here, this will probably never happen
-      console.log("!called situation happened");
-      fetch({
-        variables: {
-          input: memoizedOptions,
-        },
-      }).finally(()=>{setFetchingMore(false)});
-    }
-
-    if (called) {
-      fetchMore({
-        variables: {
-          input: memoizedOptions,
-        },
-      }).finally(()=>{setFetchingMore(false)});;
-    }
-  }, [endOfResults, called, memoizedOptions, fetch, fetchMore]);
-
-  const queryChanged = networkStatus === 2;
+  const emptyData: CursorSearchOfListOfNote = {
+    cursor: undefined,
+    results: [],
+  };
+  const mergedData =
+    data?.pages.reduce(
+      (acc, currPage) => ({
+        ...acc,
+        cursor: currPage.searchNote.cursor,
+        results: [...acc.results, ...currPage.searchNote.results],
+      }),
+      emptyData
+    ) || emptyData;
 
   return {
-    data: result,
+    data: mergedData,
     error,
-    loading: loading || queryChanged || fetchingMore,
-    refetch,
-    fetchMore: _fetchMore,
-    endOfResults,
+    isFetching,
+    isLoading,
+    fetchNextPage,
+    fetchPreviousPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetchingNextPage,
+    isFetchingPreviousPage,
     options,
-    setOptions, //TODO ? cache cursor
+    setOptions,
   };
 }

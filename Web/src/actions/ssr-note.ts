@@ -1,6 +1,6 @@
 "use server";
 
-import api from "@/axios/server";
+import api from "@/http/server";
 import { Note } from "@/gql/graphql";
 import getToken from "@/utils/get-token";
 import { cookies } from "next/headers";
