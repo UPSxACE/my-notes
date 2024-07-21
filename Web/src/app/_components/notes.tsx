@@ -41,14 +41,16 @@ export default function Notes() {
   const filteredNotes = searchData.results;
 
   useEffect(() => {
-    const isAnyLoading = isLoading || searchIsFetching || searchIsLoading;
-    if (!isAnyLoading && search === "" && hasNextPage) {
+    const isAnyLoading =
+      isLoading || isFetching || searchIsFetching || searchIsLoading;
+    if (inView && !isAnyLoading && search === "" && hasNextPage) {
       fetchNextPage();
     }
-    if (!isAnyLoading && search !== "" && searchHasNextPage) {
+    if (inView && !isAnyLoading && search !== "" && searchHasNextPage) {
       searchFetchNextPage();
     }
   }, [
+    inView,
     isLoading,
     searchIsFetching,
     searchIsLoading,
