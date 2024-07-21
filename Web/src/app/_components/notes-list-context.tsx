@@ -115,6 +115,7 @@ export default function NotesListContextProvider(props: {
         hasNextPage,
         path,
         updatePath,
+        orderBy,
         updateOrderBy,
       }}
     >

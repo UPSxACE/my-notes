@@ -70,10 +70,10 @@ public class NoteQueries
         {
             DecodedSearchCursor<string, string>? cursor;
             cursor = SearchCursorEncoder.DecodeCursor<string, string>(searchInput?.Cursor);
-            if (cursor != null && direction == "asc")
+            if (cursor != null && cursor.Cursor1 != null && direction == "asc")
                 // NOTE this is equivalent to (x.Title, x.Id) >= (title, id) in postgres; this is not natively supported by EF core
                 filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) > 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) > 0));
-            if (cursor != null && direction == "desc")
+            if (cursor != null && cursor.Cursor1 != null && direction == "desc")
                 filteredNotes = filteredNotes.Where(x => x.Title.CompareTo(cursor.Cursor1) < 0 || (x.Title == cursor.Cursor1 && x.Id.CompareTo(cursor.Cursor2) < 0));
             notes = await filteredNotes.Take(pageSize + 1).ToListAsync();
             if (notes.Count == pageSize + 1)
