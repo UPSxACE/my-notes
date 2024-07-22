@@ -104,6 +104,7 @@ export default function NotesSearchContextProvider(props: {
     setOptions((prev) => ({ ...prev, cursor: undefined }));
   }
 
+
   return (
     <NotesSearchContext.Provider
       value={{

@@ -18,12 +18,16 @@ export default function useThrottledState<T>(
       if (!throttle) setCurrent(value);
 
       timeout = setTimeout(() => {
-        if (current !== value) setCurrent(value);
+        setCurrent(value);
       }, delayMs);
     }
 
     return () => clearTimeout(timeout);
   }, [value, delayMs, current, throttleWhen]);
+
+  // do not wait for useEffect to return the current value when "throttleWhen" is being used"
+  const throttle = throttleWhen ? throttleWhen(value) : true;
+  if (!throttle) value;
 
   return current;
 }

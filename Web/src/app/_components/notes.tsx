@@ -3,7 +3,9 @@
 import SpinnerSkCircle from "@/components/spinners/sk-circle";
 import LoadingSpinner from "@/components/theme/loading-spinner";
 import useDoOnce from "@/hooks/use-do-once";
+import useThrottledState from "@/hooks/use-throttled-state";
 import { notifyFatal } from "@/utils/toaster-notifications";
+import Image from "next/image";
 import { useContext, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import Folder from "./folder";
@@ -52,6 +54,7 @@ export default function Notes() {
   }, [
     inView,
     isLoading,
+    isFetching,
     searchIsFetching,
     searchIsLoading,
     search,
@@ -69,8 +72,14 @@ export default function Notes() {
 
   const notifyErrorOnce = useDoOnce(() => notifyFatal());
 
-  if (notReady || searchNotReady) {
-    if (error) {
+  const throttledNotReady = useThrottledState(
+    notReady || searchNotReady,
+    400,
+    (value) => value === false
+  );
+
+  if (throttledNotReady) {
+    if (error || searchError) {
       notifyErrorOnce();
     }
 
@@ -83,7 +92,6 @@ export default function Notes() {
     );
   }
 
-  // FIXME empty
   // FIXME components for each
   // FIXME drag & drop
   // FIXME context menu on note + logout
@@ -102,6 +110,26 @@ export default function Notes() {
   // FIXME notifications on register/etc. (review fixmes)
 
   const enterFolder = (newPath: string) => () => updatePath(newPath);
+
+  if (search === "" && folders.length === 0 && notes.length === 0) {
+    return (
+      <section
+        id="notes"
+        className="flex flex-1 flex-col items-center justify-center p-4 px-6 pt-0"
+      >
+        <Image
+          width={557}
+          height={486}
+          className="max-h-[33vh] w-full drop-shadow-md"
+          src="/writing-figure.svg"
+          alt="Boy writing notes"
+        />
+        <h1 className="mt-8 text-center text-2xl font-medium xs:text-3xl">
+          Go ahead, and add your first note!
+        </h1>
+      </section>
+    );
+  }
 
   return (
     <section className="grid grid-cols-1 xl:grid-cols-4 gap-4 mt-2">

@@ -35,7 +35,7 @@ export default async function RootLayout({
   return (
     <WebsocketProvider>
       <QueryProvider>
-        <html lang="en" className="scroll-smooth">
+        <html lang="en" className={session ? "" : "scroll-smooth"}>
           <body className={cn(fontSans.variable, inter.className)}>
             <RootLayoutPrivate>{children}</RootLayoutPrivate>
             <Toaster richColors />
