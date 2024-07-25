@@ -136,6 +136,29 @@ public class Services(Db db)
         }).ToList();
     }
 
+    public async Task<List<FolderModel>> FoldersInPathRecursive(int userId, string path)
+    {
+        // TODO: Reddis cache this function in the future? 
+        var allFoldersInside = await ExistingFolders(x => x.UserId == userId && x.Path.StartsWith(path));
+
+        return allFoldersInside.Where(x =>
+        {
+            // skip "/"
+            if (x.Path == "/") return false;
+
+            var pathWithTrailingSlash = path == "/" ? "/" : path + "/";
+            return x.Path.StartsWith(pathWithTrailingSlash);
+        }).ToList();
+    }
+
+    public string GetFolderName(string folderPath)
+    {
+        if (folderPath == "/") return "root";
+
+        var lastSlash = folderPath.LastIndexOf('/');
+        return folderPath.Substring(lastSlash + 1);
+    }
+
     public async Task<List<NoteTagModel>> ExistingNoteTags(System.Linq.Expressions.Expression<Func<NoteTagModel, bool>> predicate)
     {
         return await db.NoteTags.Where(predicate).ToListAsync();

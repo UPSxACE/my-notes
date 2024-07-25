@@ -60,7 +60,8 @@ public class NoteQueries
         var filteredNotes = orderedNotes.Include(x => x.Folder)
                                         .Include(x => x.NoteTags!).ThenInclude(x => x.NoteTag)
                                         .Where(x => x.UserId == userContext.GetUserId()
-                                                    && x.SearchVector!.Matches(query));
+                                                    && x.SearchVector!.Matches(query)
+                                                    && x.Deleted != true);
 
 
 

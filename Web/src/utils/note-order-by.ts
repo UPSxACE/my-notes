@@ -1,4 +1,4 @@
-export enum OrderBy {
+export enum NoteOrderBy {
   LatestFirst = "latest_first",
   OldestFirst = "oldest_first",
   TitleAZ = "title_az",
@@ -9,44 +9,44 @@ export enum OrderBy {
   LeastViews = "least_views",
 }
 
-type OrderByOptions = {
+type NoteOrderByOptions = {
   direction?: "asc" | "desc";
   orderBy?: "createdat" | "priority" | "views" | "title";
 };
 
-export function enumToOptions(orderBy?: OrderBy): OrderByOptions {
+export function enumToOptions(orderBy?: NoteOrderBy): NoteOrderByOptions {
   switch (orderBy) {
-    case OrderBy.TitleAZ:
+    case NoteOrderBy.TitleAZ:
       return {
         orderBy: "title",
         direction: "asc",
       };
-    case OrderBy.TitleZA:
+    case NoteOrderBy.TitleZA:
       return {
         orderBy: "title",
         direction: "desc",
       };
-    case OrderBy.HighestPriority:
+    case NoteOrderBy.HighestPriority:
       return {
         orderBy: "priority",
         direction: "desc",
       };
-    case OrderBy.LowestPriority:
+    case NoteOrderBy.LowestPriority:
       return {
         orderBy: "priority",
         direction: "asc",
       };
-    case OrderBy.MostViews:
+    case NoteOrderBy.MostViews:
       return {
         orderBy: "views",
         direction: "desc",
       };
-    case OrderBy.LeastViews:
+    case NoteOrderBy.LeastViews:
       return {
         orderBy: "views",
         direction: "asc",
       };
-    case OrderBy.OldestFirst:
+    case NoteOrderBy.OldestFirst:
       return {
         orderBy: "createdat",
         direction: "asc",

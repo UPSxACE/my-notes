@@ -8,7 +8,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { OrderBy, enumToOptions } from "./order-by";
+import { NoteOrderBy, enumToOptions } from "../../utils/note-order-by";
 import useQueryNavigate from "./use-query-navigate";
 
 type Context = {
@@ -20,8 +20,8 @@ type Context = {
   hasNextPage: boolean;
   path?: string;
   updatePath: (newPath: string) => void;
-  orderBy?: OrderBy;
-  updateOrderBy: (newOrder: OrderBy) => void;
+  orderBy?: NoteOrderBy;
+  updateOrderBy: (newOrder: NoteOrderBy) => void;
 };
 
 const defaultValue: Context = {
@@ -32,7 +32,7 @@ const defaultValue: Context = {
   fetchNextPage: async () => {},
   hasNextPage: false,
   updatePath: (newPath: string) => {},
-  updateOrderBy: (newOrder: OrderBy) => {},
+  updateOrderBy: (newOrder: NoteOrderBy) => {},
 };
 
 export const NotesListContext = createContext<Context>(defaultValue);
@@ -42,7 +42,8 @@ export default function NotesListContextProvider(props: {
 }) {
   const searchParams = useSearchParams();
   const path = searchParams.get("path") || undefined;
-  const orderBy = (searchParams.get("order") as OrderBy) || OrderBy.LatestFirst;
+  const orderBy =
+    (searchParams.get("order") as NoteOrderBy) || NoteOrderBy.LatestFirst;
 
   const orderByOptionsInitial = useRef({ path, ...enumToOptions(orderBy) });
   const {
@@ -80,7 +81,7 @@ export default function NotesListContextProvider(props: {
     router.push(`${pathname}?${createQueryString("path", newPath)}`);
   }
 
-  function updateOrderBy(newOrder: OrderBy) {
+  function updateOrderBy(newOrder: NoteOrderBy) {
     router.push(`${pathname}?${createQueryString("order", newOrder)}`);
   }
 
@@ -98,11 +99,6 @@ export default function NotesListContextProvider(props: {
         // cursor: undefined, // cursor should be resetted when path or orderBy changes // REVIEW: maybe not needed in react query
       }));
   }, [path, orderBy, setOptions, options]);
-
-  // FIXME
-  // function resetCursor() {
-  //   setOptions((prev) => ({ ...prev, cursor: undefined }));
-  // }
 
   return (
     <NotesListContext.Provider

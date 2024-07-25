@@ -1,0 +1,14 @@
+mutation moveNote($input: MoveNoteInput!) {
+  moveNote(moveNoteInput: $input) {
+    content
+    contentText
+    createdAt
+    folder
+    id
+    priority
+    tags
+    title
+    userId
+    views
+  }
+}

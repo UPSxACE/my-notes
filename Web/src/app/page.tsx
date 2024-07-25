@@ -1,7 +1,8 @@
 import { auth } from "@/auth";
+import DropTargetContextProvider from "./_components/drop-target-context";
 import Filters from "./_components/filters";
 import Header from "./_components/header";
-import Notes from "./_components/notes";
+import Nodes from "./_components/nodes";
 import NotesListContextProvider from "./_components/notes-list-context";
 import NotesSearchContextProvider from "./_components/notes-search-context";
 import HomePageGuest from "./page-guest";
@@ -19,7 +20,9 @@ export default async function HomePage() {
         <NotesSearchContextProvider>
           <Header />
           <Filters />
-          <Notes />
+          <DropTargetContextProvider>
+            <Nodes />
+          </DropTargetContextProvider>
         </NotesSearchContextProvider>
       </NotesListContextProvider>
     </main>

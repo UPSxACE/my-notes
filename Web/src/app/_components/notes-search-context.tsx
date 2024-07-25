@@ -8,7 +8,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { OrderBy, enumToOptions } from "./order-by";
+import { NoteOrderBy, enumToOptions } from "../../utils/note-order-by";
 import useQuerySearchNote from "./use-query-search-note";
 
 type Context = {
@@ -20,7 +20,6 @@ type Context = {
   hasNextPage: boolean;
   search: string;
   updateSearch: (newSearch: string) => void;
-  resetCursor: () => void;
 };
 
 const defaultValue: Context = {
@@ -32,7 +31,6 @@ const defaultValue: Context = {
   hasNextPage: false,
   search: "",
   updateSearch: (newSearch: string) => {},
-  resetCursor: () => {},
 };
 
 export const NotesSearchContext = createContext<Context>(defaultValue);
@@ -42,7 +40,8 @@ export default function NotesSearchContextProvider(props: {
 }) {
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || "";
-  const orderBy = (searchParams.get("order") as OrderBy) || OrderBy.LatestFirst;
+  const orderBy =
+    (searchParams.get("order") as NoteOrderBy) || NoteOrderBy.LatestFirst;
 
   const orderByOptionsInitial = useRef({
     query: search,
@@ -100,11 +99,6 @@ export default function NotesSearchContextProvider(props: {
     }
   }, [orderBy, search, setOptions, options]);
 
-  function resetCursor() {
-    setOptions((prev) => ({ ...prev, cursor: undefined }));
-  }
-
-
   return (
     <NotesSearchContext.Provider
       value={{
@@ -116,7 +110,6 @@ export default function NotesSearchContextProvider(props: {
         hasNextPage,
         search,
         updateSearch,
-        resetCursor,
       }}
     >
       {props.children}

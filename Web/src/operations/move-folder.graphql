@@ -1,0 +1,10 @@
+mutation moveFolder($input: MoveFolderInput!) {
+  moveFolder(moveFolderInput: $input) {
+    id
+    lastNoteAdded
+    notesCount
+    path
+    priority
+    userId
+  }
+}

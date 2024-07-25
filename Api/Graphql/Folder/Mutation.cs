@@ -38,6 +38,47 @@ public class FolderMutations()
 
         return newFolder.ToDto(nodesCount, notes.LastOrDefault()?.CreatedAt ?? null);
     }
+
+    [Authorize(Policy = "user")]
+    public async Task<Folder> MoveFolder([Service] Services services, [Service] UserContext userContext, MoveFolderInput moveFolderInput)
+    {
+        var userId = userContext.GetUserId();
+        // find folders
+        var currentFolder = await services.ExistingFolder(x => x.UserId == userId && x.Path == moveFolderInput.CurrentPath) ?? throw new GraphQLException("Current folder not found");
+        var targetFolder = await services.ExistingFolder(x => x.UserId == userId && x.Path == moveFolderInput.TargetPath) ?? throw new GraphQLException("Target folder not found");
+
+        var oldPath = currentFolder.Path;
+        var targetPath = targetFolder.Path;
+        var newPath = targetFolder.Path + "/" + services.GetFolderName(currentFolder.Path);
+
+        // move folders
+        var foldersInside = await services.FoldersInPathRecursive(userId ?? 0, oldPath);
+        currentFolder.Path = newPath;
+        foldersInside.ForEach(x => x.Path = x.Path.Replace(oldPath, newPath));
+
+        await services.SaveChanges();
+
+        var notesList = await services.ExistingNotes(x => x.FolderId == currentFolder.Id && x.Deleted != true);
+        var foldersInsideNonRecursive = await services.FoldersInPath(userId ?? 0, currentFolder.Path);
+        var nodesCount = notesList.Count + foldersInsideNonRecursive.Count;
+
+        return currentFolder.ToDto(nodesCount, notesList.LastOrDefault()?.CreatedAt ?? null);
+    }
+
+    [Authorize(Policy = "user")]
+    public async Task<Note> MoveNote([Service] Services services, [Service] UserContext userContext, MoveNoteInput moveNoteInput)
+    {
+        // find folders
+        var note = await services.ExistingNote(x => x.UserId == userContext.GetUserId() && x.Id == moveNoteInput.NoteId && x.Deleted != true) ?? throw new GraphQLException("Note not found");
+        var targetFolder = await services.ExistingFolder(x => x.UserId == userContext.GetUserId() && x.Path == moveNoteInput.TargetPath) ?? throw new GraphQLException("Target folder not found");
+
+        // move note
+        note.Folder = targetFolder;
+
+        await services.SaveChanges();
+
+        return note.ToDto();
+    }
 }
 
 public record struct CreateFolderInput(string Path, int Priority);
@@ -67,3 +108,8 @@ public class CreateFolderInputValidator : AbstractValidator<CreateFolderInput>
         }).WithMessage("Reached limit of folder nesting.");
     }
 }
+
+
+public record struct MoveFolderInput(string CurrentPath, string TargetPath);
+public record struct MoveNoteInput(string NoteId, string TargetPath);
+

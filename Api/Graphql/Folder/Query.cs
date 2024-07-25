@@ -42,7 +42,7 @@ public class FolderQueries
         List<Folder> folders = [];
         foreach (var model in folderModels)
         {
-            var notesList = await services.ExistingNotes(x => x.FolderId == model.Id);
+            var notesList = await services.ExistingNotes(x => x.FolderId == model.Id && x.Deleted != true);
             var foldersInside = await services.FoldersInPath(userId, model.Path);
             var nodesCount = notesList.Count + foldersInside.Count;
             folders.Add(model.ToDto(nodesCount, notesList.LastOrDefault()?.CreatedAt ?? null));
@@ -119,7 +119,7 @@ public class FolderQueries
         var path = input?.Path ?? "/";
         var filteredNotes = orderedNotes.Include(x => x.Folder)
                                         .Include(x => x.NoteTags!).ThenInclude(x => x.NoteTag)
-                                        .Where(x => x.UserId == userContext.GetUserId() && x.Folder.Path == path);
+                                        .Where(x => x.UserId == userContext.GetUserId() && x.Folder.Path == path && x.Deleted != true);
 
         string? newCursor = null;
         List<NoteModel> notes = [];

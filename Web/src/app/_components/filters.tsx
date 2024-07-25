@@ -18,8 +18,8 @@ import {
 } from "@/components/ui/select";
 import { ListFilter } from "lucide-react";
 import { Inter } from "next/font/google";
+import { NoteOrderBy } from "../../utils/note-order-by";
 import { NotesSearchContext } from "./notes-search-context";
-import { OrderBy } from "./order-by";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -102,7 +102,7 @@ export default function Filters() {
           <Select
             value={orderBy}
             // defaultValue={OrderBy.LatestFirst}
-            onValueChange={(newOrder: OrderBy) => {
+            onValueChange={(newOrder: NoteOrderBy) => {
               updateOrderBy(newOrder);
               setOpen(false);
             }}
@@ -111,18 +111,24 @@ export default function Filters() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={OrderBy.LatestFirst}>Latest First</SelectItem>
-              <SelectItem value={OrderBy.OldestFirst}>Oldest First</SelectItem>
-              <SelectItem value={OrderBy.TitleAZ}>Title A-Z</SelectItem>
-              <SelectItem value={OrderBy.TitleZA}>Title Z-A</SelectItem>
-              <SelectItem value={OrderBy.HighestPriority}>
+              <SelectItem value={NoteOrderBy.LatestFirst}>
+                Latest First
+              </SelectItem>
+              <SelectItem value={NoteOrderBy.OldestFirst}>
+                Oldest First
+              </SelectItem>
+              <SelectItem value={NoteOrderBy.TitleAZ}>Title A-Z</SelectItem>
+              <SelectItem value={NoteOrderBy.TitleZA}>Title Z-A</SelectItem>
+              <SelectItem value={NoteOrderBy.HighestPriority}>
                 Highest Priority
               </SelectItem>
-              <SelectItem value={OrderBy.LowestPriority}>
+              <SelectItem value={NoteOrderBy.LowestPriority}>
                 Lowest Priority
               </SelectItem>
-              <SelectItem value={OrderBy.MostViews}>Most Views</SelectItem>
-              <SelectItem value={OrderBy.LeastViews}>Least Views</SelectItem>
+              <SelectItem value={NoteOrderBy.MostViews}>Most Views</SelectItem>
+              <SelectItem value={NoteOrderBy.LeastViews}>
+                Least Views
+              </SelectItem>
             </SelectContent>
           </Select>
         </PopoverContent>

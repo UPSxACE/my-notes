@@ -16,10 +16,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useToggle from "@/hooks/use-toggle";
 import { debounce } from "lodash";
+import { enumToOptions } from "../../utils/note-order-by";
 import NewFolderDialog from "./new-folder-dialog";
 import { NotesListContext } from "./notes-list-context";
 import { NotesSearchContext } from "./notes-search-context";
-import { enumToOptions } from "./order-by";
 
 export default function Header() {
   const { search, updateSearch } = useContext(NotesSearchContext);

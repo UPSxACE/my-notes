@@ -6,14 +6,15 @@ import useDoOnce from "@/hooks/use-do-once";
 import useThrottledState from "@/hooks/use-throttled-state";
 import { notifyFatal } from "@/utils/toaster-notifications";
 import Image from "next/image";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useInView } from "react-intersection-observer";
 import Folder from "./folder";
 import Note from "./note";
 import { NotesListContext } from "./notes-list-context";
 import { NotesSearchContext } from "./notes-search-context";
 
-export default function Notes() {
+export default function Nodes() {
+  const constraintsRef = useRef<HTMLDivElement>(null);
   // const [inViewCalculated, setInViewCalculated] = useState()
   // Without search
   const {
@@ -24,6 +25,7 @@ export default function Notes() {
     error,
     hasNextPage,
     updatePath,
+    orderBy,
   } = useContext(NotesListContext);
   const { ref, inView, entry } = useInView({
     threshold: 0,
@@ -92,8 +94,6 @@ export default function Notes() {
     );
   }
 
-  // FIXME components for each
-  // FIXME drag & drop
   // FIXME context menu on note + logout
   // FIXME hover effect
   // FIXME onclick triggers + (inner join noteNoteTags + inner join noteTags + and filter OR)
@@ -103,11 +103,12 @@ export default function Notes() {
   // FIXME sidebar
   // FIXME responsiveness + smaller sidebar for smaller screens
   // FIXME style note view
-  // FIXME context menu (+ select)
+  // FIXME context menu (+ select, + cut, + paste)
   // FIXME return style instead of class in transition hooks
   // FIXME 15: workana + productivity + clean (plan)
   // FIXME order folder names by name
   // FIXME notifications on register/etc. (review fixmes)
+  // FIXME is nesting folders more than 5 levels currently possible through create folder button? or unhandled error?
 
   const enterFolder = (newPath: string) => () => updatePath(newPath);
 
@@ -132,20 +133,28 @@ export default function Notes() {
   }
 
   return (
-    <section className="grid grid-cols-1 xl:grid-cols-4 gap-4 mt-2">
+    <section
+      ref={constraintsRef}
+      className="grid grid-cols-1 xl:grid-cols-4 gap-4 mt-2"
+    >
       {search === "" &&
         folders.map((f, index) => {
           return (
-            <Folder key={index} folder={f} enterFolder={enterFolder(f.path)} />
+            <Folder
+              constraintsRef={constraintsRef}
+              key={f.id}
+              folder={f}
+              enterFolder={enterFolder(f.path)}
+            />
           );
         })}
       {search === "" &&
         notes.map((n, index) => {
-          return <Note key={index} note={n} />;
+          return <Note constraintsRef={constraintsRef} key={n.id} note={n} />;
         })}
       {search !== "" &&
         filteredNotes.map((n, index) => {
-          return <Note key={index} note={n} />;
+          return <Note constraintsRef={constraintsRef} key={n.id} note={n} />;
         })}
       {search === "" && hasNextPage && (
         <div ref={ref} className="col-span-1 xl:col-span-4 flex justify-center">
